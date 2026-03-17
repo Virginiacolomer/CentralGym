@@ -1,8 +1,9 @@
 
 {
-  "framework": "angular",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist/frontend/browser",
   "routes": [
-    { "handle": "filesystem" }
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
