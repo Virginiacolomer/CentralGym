@@ -1,0 +1,19 @@
+<header class="topbar">
+  <div class="brand-wrap">
+    @if (showBack) {
+      <a class="back" [routerLink]="backHref" aria-label="Volver">
+        <i class="fi fi-rr-angle-left" aria-hidden="true"></i>
+      </a>
+    }
+
+    <a class="brand" [routerLink]="brandHref" aria-label="CentralGym inicio">
+      <img class="brand-logo" src="/images/Central%20Gym.png" alt="Central Gym" />
+      <span class="brand-text">CENTRAL<span>GYM</span></span>
+    </a>
+  </div>
+
+  <nav class="actions" aria-label="Acciones principales">
+    <a class="btn btn-primary" [routerLink]="loginHref">Inicia Sesion</a>
+    <a class="btn btn-light" [routerLink]="registerHref">Registrate</a>
+  </nav>
+</header>

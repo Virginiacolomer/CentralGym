@@ -1,0 +1,59 @@
+<app-page-bg>
+  <main class="page-with-compact-header">
+    <app-page-header-compact backHref="/"></app-page-header-compact>
+    <section class="page-body">
+      <div class="register-shell">
+        <h1>Registrate</h1>
+
+        <form class="register-form" novalidate>
+          <label class="sr-only" for="register-email">Correo electronico</label>
+          <input
+            id="register-email"
+            type="email"
+            name="email"
+            placeholder="correo electronico"
+            autocomplete="email"
+          />
+
+          <label class="sr-only" for="register-name">Nombre</label>
+          <input
+            id="register-name"
+            type="text"
+            name="name"
+            placeholder="nombre"
+            autocomplete="given-name"
+          />
+
+          <label class="sr-only" for="register-lastname">Apellido</label>
+          <input
+            id="register-lastname"
+            type="text"
+            name="lastName"
+            placeholder="apellido"
+            autocomplete="family-name"
+          />
+
+          <label class="sr-only" for="register-password">Contraseña</label>
+          <input
+            id="register-password"
+            type="password"
+            name="password"
+            placeholder="contraseña"
+            autocomplete="new-password"
+          />
+
+          <label class="sr-only" for="register-password-confirm">Repeti tu contraseña</label>
+          <input
+            id="register-password-confirm"
+            type="password"
+            name="passwordConfirm"
+            placeholder="repeti tu contraseña"
+            autocomplete="new-password"
+          />
+
+          <a class="secondary-link" routerLink="/login">Ya tengo cuenta</a>
+        </form>
+      </div>
+    </section>
+  </main>
+</app-page-bg>

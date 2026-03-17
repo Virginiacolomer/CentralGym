@@ -1,0 +1,273 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Teko:wght@500;700&display=swap');
+
+:host {
+  display: block;
+}
+
+/* Variables de color de membresias (fondo y circulos gestionados por app-page-bg). */
+.members-page {
+  --bg: #030607;
+  --green: #39f45a;
+  --text: #e9edf0;
+  --muted: #c8d0d5;
+  color: var(--text);
+  font-family: 'Sora', sans-serif;
+}
+
+.members-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.15rem 2rem 1.1rem;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+.brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: var(--green);
+  font-size: 1.4rem;
+  text-decoration: none;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  text-decoration: none;
+}
+
+.brand-logo {
+  display: block;
+  height: clamp(28px, 4vw, 40px);
+  width: auto;
+  object-fit: contain;
+}
+
+.brand-text {
+  font-family: 'Teko', sans-serif;
+  font-size: clamp(2.05rem, 3.7vw, 3.05rem);
+  line-height: 0.76;
+  letter-spacing: 0.025em;
+  font-weight: 700;
+  color: #eef2f4;
+}
+
+.brand-text span {
+  color: var(--green);
+}
+
+.actions {
+  display: flex;
+  gap: 0.9rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 112px;
+  padding: 0.58rem 1.1rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: transform 160ms ease, filter 160ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.btn-primary {
+  color: #05230e;
+  background: var(--green);
+}
+
+.btn-light {
+  color: #24262b;
+  background: #d3d5d8;
+}
+
+.members-grid {
+  display: grid;
+  grid-template-columns: 1.08fr 0.92fr;
+  gap: 1.8rem;
+  align-items: start;
+}
+
+.members-copy h1 {
+  margin: 1rem 0 1.4rem;
+  font-family: 'Teko', sans-serif;
+  font-size: clamp(3.2rem, 6vw, 4.4rem);
+  line-height: 0.85;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--green);
+}
+
+.plan-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.58rem 1.35rem;
+  margin-bottom: 1rem;
+  border-radius: 999px;
+  background: #49515d;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.plan-row span {
+  font-style: italic;
+  font-weight: 700;
+  font-size: 1.03rem;
+  color: #f3f5f6;
+}
+
+.plan-row strong {
+  font-size: 1.68rem;
+  font-family: 'Teko', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #c7d1d6;
+}
+
+.members-copy p {
+  margin: 2rem 0 0;
+  font-size: clamp(1.2rem, 2.2vw, 2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  max-width: 530px;
+  color: #e8ecef;
+}
+
+.image-card {
+  border: 5px solid transparent;
+  border-radius: 30px;
+  overflow: hidden;
+  background: #101010;
+  width: min(100%, 500px);
+  justify-self: end;
+}
+
+.image-card img {
+  display: block;
+  width: 100%;
+  height: clamp(380px, 65svh, 540px);
+  object-fit: contain;
+  object-position: center;
+  filter: none;
+}
+
+@media (max-width: 1040px) {
+  .members-shell {
+    padding-inline: 1.25rem;
+  }
+
+  .members-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .image-card {
+    justify-self: start;
+    width: min(100%, 500px);
+  }
+
+  .decor-bottom {
+    right: 0;
+    bottom: -42%;
+  }
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .actions {
+    width: 100%;
+  }
+
+  .btn {
+    flex: 1;
+  }
+
+  .members-copy h1 {
+    margin-top: 0.5rem;
+  }
+
+  .plan-row {
+    padding-inline: 1rem;
+  }
+
+  .plan-row span {
+    font-size: 0.94rem;
+  }
+
+  .plan-row strong {
+    font-size: 1.45rem;
+  }
+
+  .image-card img {
+    height: 410px;
+  }
+}
+
+@media (max-width: 460px) {
+  .members-shell {
+    padding: 1rem 0.9rem 1.2rem;
+  }
+
+  .brand-logo {
+    height: 26px;
+  }
+
+  .brand-text {
+    font-size: 1.82rem;
+  }
+
+  .back {
+    font-size: 1.2rem;
+  }
+
+  .plan-row {
+    padding: 0.56rem 0.88rem;
+  }
+
+  .plan-row span {
+    font-size: 0.82rem;
+  }
+
+  .plan-row strong {
+    font-size: 1.22rem;
+  }
+
+  .members-copy p {
+    font-size: 1.25rem;
+  }
+
+  .image-card img {
+    height: 360px;
+  }
+}

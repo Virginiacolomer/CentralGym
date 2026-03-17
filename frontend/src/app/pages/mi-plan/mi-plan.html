@@ -1,0 +1,52 @@
+<app-page-bg>
+  <main class="page-with-compact-header">
+    <app-page-header-compact backHref="/menu-cliente"></app-page-header-compact>
+    <section class="page-body">
+      <div class="plan-shell">
+        <h1>Mi plan</h1>
+
+        <section class="plan-days" aria-label="Rutina semanal">
+          @for (day of days; track day.label; let index = $index) {
+            <article class="day-block">
+              <button
+                type="button"
+                class="day-toggle"
+                [attr.aria-expanded]="day.expanded"
+                (click)="toggleDay(index)"
+              >
+                <span class="day-label">{{ day.label }}</span>
+                <span class="day-arrow" [class.day-arrow-open]="day.expanded" aria-hidden="true"></span>
+              </button>
+
+              @if (day.expanded) {
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Ejercicio</th>
+                        <th>Series y repeticiones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (row of day.exercises; track row.exercise) {
+                        <tr>
+                          <td>{{ row.exercise }}</td>
+                          <td>{{ row.workload }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </article>
+          }
+        </section>
+
+        <button type="button" class="download-btn">
+          <span class="download-icon" aria-hidden="true"></span>
+          <span>Descargar PDF</span>
+        </button>
+      </div>
+    </section>
+  </main>
+</app-page-bg>

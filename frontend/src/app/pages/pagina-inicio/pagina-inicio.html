@@ -1,0 +1,62 @@
+<app-page-bg>
+<div class="home-page">
+	<!-- Contenedor principal del hero: header + contenido izquierdo + tarjeta derecha. -->
+	<section class="hero-shell">
+		<!-- Encabezado reutilizable compartido en /shared. -->
+		<app-page-header></app-page-header>
+
+		<!-- Grilla de dos columnas: texto y tarjetas a la izquierda, imagen motivacional a la derecha. -->
+		<div class="hero-grid">
+			<!-- Columna de contenido principal. -->
+			<article class="hero-copy">
+				<h1>Hackea tu biologia</h1>
+				<!-- Parrafo descriptivo del valor del gimnasio/plataforma. -->
+				<p>
+					Entrenar no es solo una rutina, es un compromiso con vos mismo. Nuestro gimnasio
+					combina acompanamiento profesional con una plataforma digital para gestionar tu
+					membresia y mantenerte enfocado en tus objetivos.
+				</p>
+
+				<!-- Tarjetas de beneficios. -->
+				<div class="feature-cards">
+					<section class="feature">
+						<!-- Icono decorativo dibujado con CSS. -->
+						<i class="fi fi-rr-list-check" aria-hidden="true"></i>
+						<h2>Visualiza tu plan a traves de la pagina</h2>
+					</section>
+
+					<section class="feature">
+						<!-- Icono decorativo dibujado con CSS. -->
+						<i class="fi fi-rr-credit-card" aria-hidden="true"></i>
+						<h2>Paga desde la comodidad de tu casa</h2>
+					</section>
+				</div>
+
+				<!-- Boton principal de conversion. -->
+				<a class="cta" href="/membresias">Conoce nuestras membresias</a>
+			</article>
+
+			<!-- Columna visual derecha con foto y mensaje de progreso. -->
+			<aside class="hero-card" aria-label="Imagen motivacional">
+				<!-- Imagen principal del hero. -->
+				<img
+					src="https://images.unsplash.com/photo-1534367610401-9f5ed68180aa?auto=format&fit=crop&w=880&q=80"
+					alt="Atleta entrenando con mancuerna"
+					loading="lazy"
+				/>
+
+				<!-- Bloque superpuesto con arco de progreso y claim motivacional. -->
+				<div class="progress-wrap">
+					<!-- Arco semicurvo armado solo con bordes en CSS. -->
+					<div class="progress-arc" aria-hidden="true"></div>
+					<p>Cada entrenamiento te acerca a tu mejor version.</p>
+					<strong>
+						<span class="progress-line">Tu progreso</span>
+						<span class="progress-line">Empieza hoy</span>
+					</strong>
+				</div>
+			</aside>
+		</div>
+	</section>
+</div>
+</app-page-bg>

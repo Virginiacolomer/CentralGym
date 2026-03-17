@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Teko:wght@500;700&display=swap');
+
+:host {
+  display: block;
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 15% -10%, rgba(38, 219, 81, 0.14) 0%, rgba(3, 6, 7, 0) 43%),
+    radial-gradient(circle at 85% 12%, rgba(65, 255, 103, 0.09) 0%, rgba(3, 6, 7, 0) 34%),
+    #030607;
+  color: #e9edf0;
+  font-family: 'Sora', sans-serif;
+}
+
+.decor {
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+  width: 45vw;
+  min-width: 320px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle,
+    rgba(62, 232, 122, 0.5) 0 2px,
+    rgba(62, 232, 122, 0) 2px 16px
+  );
+  opacity: 0.55;
+}
+
+.decor-top {
+  top: -24%;
+  left: -9%;
+}
+
+.decor-bottom {
+  right: 25%;
+  bottom: -34%;
+  transform: rotate(28deg) scale(1.35);
+}

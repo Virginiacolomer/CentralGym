@@ -1,0 +1,29 @@
+<app-page-bg>
+  <main class="page-with-compact-header">
+    <app-page-header-compact backHref="/mis-pagos"></app-page-header-compact>
+    <section class="page-body">
+      <div class="history-shell">
+        <h1>Historial de pagos</h1>
+
+        <div class="table-wrap">
+          <table aria-label="Historial de pagos del cliente">
+            <thead>
+              <tr>
+                <th>Mes</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (payment of paymentHistory; track payment.month) {
+                <tr>
+                  <td>{{ payment.month }}</td>
+                  <td>{{ payment.status }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</app-page-bg>

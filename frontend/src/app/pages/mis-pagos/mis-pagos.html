@@ -1,0 +1,28 @@
+<app-page-bg>
+  <main class="page-with-compact-header">
+    <app-page-header-compact backHref="/menu-cliente"></app-page-header-compact>
+    <section class="page-body">
+      <div class="payments-shell">
+        <h1>Mis pagos</h1>
+
+        <section class="status-panel" aria-label="Estado del pago actual">
+          <div class="status-pill">
+            <span
+              class="status-dot"
+              [class.status-dot-up-to-date]="currentStatus === 'upToDate'"
+              [class.status-dot-due-soon]="currentStatus === 'dueSoon'"
+              [class.status-dot-overdue]="currentStatus === 'overdue'"
+              aria-hidden="true"
+            ></span>
+            <span class="status-label">{{ status.label }}</span>
+          </div>
+
+          <p class="status-detail">{{ status.detail }}</p>
+          <p class="next-payment">Proximo pago: <strong>{{ status.nextPayment }}</strong></p>
+        </section>
+
+        <a class="history-link" routerLink="/historial-de-pagos">Historial de pagos</a>
+      </div>
+    </section>
+  </main>
+</app-page-bg>

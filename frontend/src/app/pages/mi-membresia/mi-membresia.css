@@ -1,0 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Teko:wght@500;700&display=swap');
+
+:host {
+	display: block;
+}
+
+.page-with-compact-header {
+	min-height: 100svh;
+}
+
+.page-body {
+	display: flex;
+	justify-content: center;
+	padding: 1rem max(1.25rem, env(safe-area-inset-right)) calc(3rem + env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
+}
+
+.content-shell {
+	width: min(100%, 560px);
+	min-height: calc(100svh - 8rem);
+	padding-top: clamp(0.8rem, 4vw, 1.6rem);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	font-family: 'Sora', sans-serif;
+	color: #edf1f2;
+}
+
+.content-shell h1 {
+	margin: 0 0 2.9rem;
+	font-family: 'Teko', sans-serif;
+	font-size: clamp(3rem, 8vw, 4.5rem);
+	line-height: 0.85;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: #39f45a;
+}
+
+.membership-summary {
+	margin-bottom: 4.8rem;
+}
+
+.membership-summary h2 {
+	margin: 0 0 0.65rem;
+	font-size: clamp(1.15rem, 3vw, 1.55rem);
+	font-weight: 800;
+	color: #f4f5f6;
+	text-transform: uppercase;
+}
+
+.membership-summary p {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 700;
+	color: #eef1f2;
+}
+
+.change-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: min(100%, 204px);
+	min-height: 74px;
+	padding: 0.8rem 1.2rem;
+	border-radius: 22px;
+	background: linear-gradient(180deg, #5b626b 0%, #525960 100%);
+	color: #eceef0;
+	font-size: clamp(1rem, 2.8vw, 1.1rem);
+	font-weight: 700;
+	line-height: 1.2;
+	text-decoration: underline;
+	text-align: center;
+}
+
+.footnote {
+	margin: 1.45rem 0 0;
+	max-width: 29rem;
+	font-size: 0.95rem;
+	font-style: italic;
+	font-weight: 700;
+	line-height: 1.45;
+	color: #f0f2f3;
+}
+
+@media (max-width: 480px) {
+	.page-body {
+		padding-right: max(1rem, env(safe-area-inset-right));
+		padding-left: max(1rem, env(safe-area-inset-left));
+	}
+
+	.content-shell {
+		min-height: auto;
+		padding-top: 0.7rem;
+	}
+
+	.content-shell h1 {
+		font-size: 2.8rem;
+		margin-bottom: 2.1rem;
+	}
+
+	.membership-summary {
+		margin-bottom: 3.2rem;
+	}
+
+	.membership-summary h2 {
+		font-size: 1.05rem;
+	}
+
+	.change-link {
+		width: min(100%, 220px);
+	}
+
+	.footnote {
+		font-size: 0.88rem;
+	}
+}
