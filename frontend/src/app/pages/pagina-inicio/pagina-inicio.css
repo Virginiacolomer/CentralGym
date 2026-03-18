@@ -379,6 +379,10 @@
 		min-width: 145px;
 	}
 
+	.cta {
+		width: 100%;
+	}
+
 	.hero-card img {
 		height: 410px;
 	}
