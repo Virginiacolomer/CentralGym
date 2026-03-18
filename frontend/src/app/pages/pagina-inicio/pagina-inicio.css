@@ -235,6 +235,8 @@
 	font-weight: 700;
 	text-decoration: none;
 	transition: transform 170ms ease, box-shadow 170ms ease;
+	max-width: 100%;
+	box-sizing: border-box;
 }
 
 /* Hover del CTA para dar sensacion de elevacion. */

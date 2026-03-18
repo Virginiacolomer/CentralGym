@@ -25,27 +25,107 @@
                       <tr>
                         <th>Ejercicio</th>
                         <th>Series y repeticiones</th>
+                        @if (isEditing) {
+                          <th class="remove-head"></th>
+                        }
                       </tr>
                     </thead>
                     <tbody>
-                      @for (row of day.exercises; track row.exercise) {
+                      @for (row of day.exercises; track rowIndex; let rowIndex = $index) {
                         <tr>
-                          <td>{{ row.exercise }}</td>
-                          <td>{{ row.workload }}</td>
+                          @if (isEditing) {
+                            <td>
+                              <input
+                                type="text"
+                                [(ngModel)]="row.exercise"
+                                class="exercise-input"
+                                placeholder="Nombre del ejercicio"
+                                list="exercise-options"
+                                (blur)="validateExerciseSelection(index, rowIndex)"
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="text"
+                                [(ngModel)]="row.workload"
+                                class="workload-input"
+                                placeholder="3x12"
+                              />
+                            </td>
+                            <td class="remove-cell">
+                              <button
+                                type="button"
+                                class="remove-row-btn"
+                                (click)="removeExerciseRow(index, rowIndex)"
+                                aria-label="Quitar fila"
+                                title="Quitar fila"
+                              >
+                                -
+                              </button>
+                            </td>
+                          } @else {
+                            <td>{{ row.exercise }}</td>
+                            <td>{{ row.workload }}</td>
+                          }
                         </tr>
                       }
                     </tbody>
                   </table>
+
+                  @if (isEditing) {
+                    <button type="button" class="add-row-btn" (click)="addExerciseRow(index)">
+                      Agregar fila
+                    </button>
+                  }
                 </div>
               }
             </article>
           }
         </section>
 
-        <button type="button" class="download-btn">
-          <span class="download-icon" aria-hidden="true"></span>
-          <span>Descargar PDF</span>
-        </button>
+        <datalist id="exercise-options">
+          @for (exerciseName of exerciseOptions; track exerciseName) {
+            <option [value]="exerciseName"></option>
+          }
+        </datalist>
+
+        <div class="button-group">
+          @if (isEditing) {
+            @if (availablePlans.length > 0) {
+              <div class="predefined-plans-section">
+                <label class="plans-label">Asignar plan predeterminado:</label>
+                <div class="plans-controls">
+                  <select [(ngModel)]="selectedPlanId" class="plans-select">
+                    <option value="">-- Seleccionar plan --</option>
+                    @for (plan of availablePlans; track plan.id) {
+                      <option [value]="plan.id">{{ plan.title }}</option>
+                    }
+                  </select>
+                  <button type="button" class="assign-plan-btn" (click)="assignPredefinedPlan()" [disabled]="!selectedPlanId">
+                    <span class="icon" aria-hidden="true"></span>
+                    Asignar
+                  </button>
+                </div>
+              </div>
+            }
+            <button type="button" class="save-btn" (click)="savePlan()">
+              <span class="icon" aria-hidden="true"></span>
+              <span>Guardar cambios</span>
+            </button>
+            <button type="button" class="cancel-btn" (click)="cancelEditing()">
+              <span>Cancelar</span>
+            </button>
+          } @else {
+            <button type="button" class="edit-btn" (click)="startEditing()">
+              <span class="icon" aria-hidden="true"></span>
+              <span>Editar plan</span>
+            </button>
+            <button type="button" class="download-btn">
+              <span class="download-icon" aria-hidden="true"></span>
+              <span>Descargar PDF</span>
+            </button>
+          }
+        </div>
       </div>
     </section>
   </main>

@@ -1,0 +1,301 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Teko:wght@500;700&display=swap');
+
+:host {
+  display: block;
+}
+
+.page-with-compact-header {
+  min-height: 100svh;
+}
+
+.page-body {
+  display: flex;
+  justify-content: center;
+  padding: 1rem max(1.25rem, env(safe-area-inset-right)) calc(2.4rem + env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
+}
+
+.create-plan-shell {
+  width: min(100%, 560px);
+  font-family: 'Sora', sans-serif;
+}
+
+.create-plan-shell h1 {
+  margin: 0 0 0.85rem;
+  font-family: 'Teko', sans-serif;
+  font-size: clamp(3rem, 8vw, 4.2rem);
+  line-height: 0.85;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #39f45a;
+  text-align: center;
+}
+
+.create-plan-panel {
+  display: grid;
+  gap: 0.8rem;
+  padding: 1rem;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #616972 0%, #555d66 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.create-plan-panel p {
+  margin: 0 0 0.1rem;
+  color: #ecf0f2;
+  font-size: 0.96rem;
+}
+
+.create-plan-panel label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.93rem;
+  color: #eaf0f3;
+  font-weight: 600;
+}
+
+.create-plan-panel input {
+  width: 100%;
+  padding: 0.66rem 0.72rem;
+  border: 0;
+  border-radius: 12px;
+  background: #d5dbe0;
+  color: #23282e;
+  font-size: 0.95rem;
+  font-family: 'Sora', sans-serif;
+}
+
+.create-plan-panel textarea,
+.create-plan-panel select {
+  width: 100%;
+  padding: 0.66rem 0.72rem;
+  border: 0;
+  border-radius: 12px;
+  background: #d5dbe0;
+  color: #23282e;
+  font-size: 0.95rem;
+  font-family: 'Sora', sans-serif;
+  resize: vertical;
+}
+
+.create-plan-panel input:focus {
+  outline: 2px solid rgba(57, 244, 90, 0.55);
+  outline-offset: 1px;
+}
+
+.create-plan-panel textarea:focus,
+.create-plan-panel select:focus {
+  outline: 2px solid rgba(57, 244, 90, 0.55);
+  outline-offset: 1px;
+}
+
+.days-config {
+  margin-top: 0.25rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.days-config h2 {
+  margin: 0.2rem 0 0.15rem;
+  font-family: 'Teko', sans-serif;
+  font-size: clamp(2rem, 4.5vw, 2.7rem);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #39f45a;
+}
+
+.day-block {
+  width: 100%;
+}
+
+.day-toggle {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.2rem 0;
+  border: 0;
+  background: transparent;
+  color: #39f45a;
+  font-family: 'Teko', sans-serif;
+  font-size: clamp(1.8rem, 4vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.day-label {
+  line-height: 0.9;
+}
+
+.day-arrow {
+  position: relative;
+  width: 30px;
+  height: 22px;
+  border-radius: 8px;
+  background: #4dff0f;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+}
+
+.day-arrow::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid #101314;
+  transform: translate(-50%, -30%);
+  transition: transform 160ms ease;
+}
+
+.day-arrow-open::before {
+  transform: translate(-50%, -60%) rotate(180deg);
+}
+
+.day-fields {
+  margin-top: 0.45rem;
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.72rem;
+  border-radius: 14px;
+  background: rgba(34, 40, 45, 0.22);
+}
+
+.exercise-row {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.62rem;
+  border-radius: 12px;
+  background: rgba(19, 24, 28, 0.24);
+}
+
+.exercise-picker-inline {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.custom-exercise-inline {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.45rem;
+}
+
+.save-custom-btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 0.5rem 0.7rem;
+  background: #8ee45d;
+  color: #0c1c10;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.save-custom-btn:hover {
+  filter: brightness(1.04);
+}
+
+.add-row-btn,
+.remove-row-btn {
+  width: fit-content;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.36rem 0.72rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.add-row-btn {
+  background: #8ee45d;
+  color: #0c1c10;
+}
+
+.remove-row-btn {
+  background: #c6cbd0;
+  color: #1e242a;
+}
+
+.remove-row-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submit-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.saving-status {
+  color: #39f45a;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-align: center;
+  animation: fadeIn 300ms ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.create-submit-btn {
+  width: 100%;
+  border: 0;
+  border-radius: 999px;
+  padding: 0.72rem 1rem;
+  background: linear-gradient(120deg, #11cc4c, #8ee45d);
+  color: #06160a;
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.create-submit-btn:hover {
+  filter: brightness(1.04);
+}
+
+@media (max-width: 480px) {
+  .page-body {
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-left: max(1rem, env(safe-area-inset-left));
+  }
+
+  .create-plan-shell h1 {
+    font-size: 3rem;
+  }
+
+  .create-plan-panel {
+    border-radius: 20px;
+    padding: 0.9rem;
+  }
+
+  .day-toggle {
+    font-size: 1.72rem;
+  }
+
+  .day-arrow {
+    width: 28px;
+    height: 21px;
+  }
+
+  .custom-exercise-inline {
+    grid-template-columns: 1fr;
+  }
+}

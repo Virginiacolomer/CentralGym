@@ -1,0 +1,141 @@
+<app-page-bg>
+  <main class="page-with-compact-header">
+    <app-page-header-compact backHref="/menu-admin"></app-page-header-compact>
+
+    <section class="page-body" aria-labelledby="crear-plan-titulo">
+      <article class="create-plan-shell">
+        <h1 id="crear-plan-titulo">Crear plan</h1>
+
+        <div class="create-plan-panel">
+          <p>Completá los datos para dar de alta una nueva opcion de plan.</p>
+
+          <label>
+            Titulo
+            <input type="text" placeholder="Ej: Plan fuerza inicial" [(ngModel)]="planTitle" />
+          </label>
+
+          <label>
+            Frecuencia (cantidad de dias)
+            <input
+              type="number"
+              min="1"
+              max="7"
+              [ngModel]="frequencyDays"
+              (ngModelChange)="onFrequencyInput($event)"
+              placeholder="Ej: 3"
+            />
+          </label>
+
+          <label>
+            Descripcion (opcional)
+            <textarea
+              rows="3"
+              placeholder="Ej: Plan orientado a fuerza para nivel inicial."
+              [(ngModel)]="description"
+            ></textarea>
+          </label>
+
+          @if (canConfigureDays) {
+            <section class="days-config" aria-label="Configuracion de dias del plan">
+              <h2>Configura tus dias</h2>
+
+              @for (day of configuredDays; track day.label; let index = $index) {
+                <article class="day-block">
+                  <button
+                    type="button"
+                    class="day-toggle"
+                    [attr.aria-expanded]="day.expanded"
+                    (click)="toggleDay(index)"
+                  >
+                    <span class="day-label">{{ day.label }}</span>
+                    <span class="day-arrow" [class.day-arrow-open]="day.expanded" aria-hidden="true"></span>
+                  </button>
+
+                  @if (day.expanded) {
+                    <div class="day-fields">
+                      @for (exercise of day.exercises; track $index; let exerciseIndex = $index) {
+                        <div class="exercise-row">
+                          <label>
+                            Grupo muscular
+                            <select
+                              [(ngModel)]="exercise.muscleGroup"
+                              (ngModelChange)="onMuscleGroupChange(index, exerciseIndex)"
+                            >
+                              <option value="">Seleccionar grupo</option>
+                              @for (group of muscleGroups; track group) {
+                                <option [value]="group">{{ group }}</option>
+                              }
+                            </select>
+                          </label>
+
+                          <label>
+                            Ejercicio
+                            <div class="exercise-picker-inline">
+                              <select [(ngModel)]="exercise.exercise" [disabled]="!exercise.muscleGroup">
+                                <option value="">Seleccionar ejercicio</option>
+                                @for (option of getExercisesForGroup(exercise.muscleGroup); track option) {
+                                  <option [value]="option">{{ option }}</option>
+                                }
+                                <option [value]="otherExerciseValue">Otro</option>
+                              </select>
+
+                              @if (isOtherExerciseSelected(exercise)) {
+                                <div class="custom-exercise-inline">
+                                  <input
+                                    type="text"
+                                    placeholder="Nombre del ejercicio"
+                                    [(ngModel)]="exercise.customExerciseName"
+                                  />
+                                  <button
+                                    type="button"
+                                    class="save-custom-btn"
+                                    (click)="addCustomExercise(index, exerciseIndex)"
+                                  >
+                                    Agregar
+                                  </button>
+                                </div>
+                              }
+                            </div>
+                          </label>
+
+                          <label>
+                            Series y repeticiones
+                            <input
+                              type="text"
+                              placeholder="Ej: 4x12"
+                              [(ngModel)]="exercise.workload"
+                            />
+                          </label>
+
+                          <button
+                            type="button"
+                            class="remove-row-btn"
+                            [disabled]="day.exercises.length === 1"
+                            (click)="removeExercise(index, exerciseIndex)"
+                          >
+                            Quitar ejercicio
+                          </button>
+                        </div>
+                      }
+
+                      <button type="button" class="add-row-btn" (click)="addExercise(index)">
+                        + Agregar ejercicio
+                      </button>
+                    </div>
+                  }
+                </article>
+              }
+            </section>
+          }
+
+          <div class="submit-section">
+            @if (savingStatus) {
+              <span class="saving-status">{{ savingStatus }}</span>
+            }
+            <button type="button" class="create-submit-btn" (click)="savePlan()">Crear plan</button>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+</app-page-bg>

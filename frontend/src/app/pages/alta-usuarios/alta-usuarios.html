@@ -1,0 +1,47 @@
+<app-page-bg>
+  <main class="page-with-compact-header">
+    <app-page-header-compact backHref="/menu-admin"></app-page-header-compact>
+
+    <section class="page-body">
+      <div class="signup-shell">
+        <h1>Alta de usuarios</h1>
+
+        <div class="signup-panel">
+          <table aria-label="Solicitudes de alta de usuarios">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>DNI</th>
+                <th class="actions-head">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (pendingAccounts.length === 0) {
+                <tr>
+                  <td class="empty-row" colspan="4">No hay cuentas pendientes de aprobacion.</td>
+                </tr>
+              } @else {
+                @for (account of pendingAccounts; track account.id) {
+                  <tr>
+                    <td>{{ account.firstName }}</td>
+                    <td>{{ account.lastName }}</td>
+                    <td>{{ account.dni }}</td>
+                    <td class="actions-cell">
+                      <button type="button" class="action-btn action-btn-accept" (click)="acceptAccount(account.id)">
+                        Aceptar
+                      </button>
+                      <button type="button" class="action-btn action-btn-delete" (click)="deleteAccount(account.id)">
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</app-page-bg>

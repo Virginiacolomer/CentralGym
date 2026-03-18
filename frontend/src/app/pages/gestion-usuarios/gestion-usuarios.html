@@ -105,7 +105,6 @@
                             <span
                               class="status-pill"
                               [class.status-pill-ok]="user.paymentState === 'alDia'"
-                              [class.status-pill-warning]="user.paymentState === 'porVencer'"
                               [class.status-pill-danger]="user.paymentState === 'cuotaPendiente'"
                             >
                               {{ getStatusLabel(user.paymentState) }}

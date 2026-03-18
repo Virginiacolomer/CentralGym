@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Teko:wght@500;700&display=swap');
+
+:host {
+  display: block;
+}
+
+.page-with-compact-header {
+  min-height: 100svh;
+}
+
+.page-body {
+  display: flex;
+  justify-content: center;
+  padding: 1rem max(1.25rem, env(safe-area-inset-right)) calc(2.5rem + env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
+}
+
+.signup-shell {
+  width: min(100%, 920px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Sora', sans-serif;
+}
+
+.signup-shell h1 {
+  margin: 0 0 0.8rem;
+  font-family: 'Teko', sans-serif;
+  font-size: clamp(3rem, 8vw, 4.4rem);
+  line-height: 0.85;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #39f45a;
+  text-align: center;
+}
+
+.signup-panel {
+  width: 100%;
+  border-radius: 24px;
+  padding: 0.7rem 0.85rem 0.9rem;
+  background: #8f959c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #1f2225;
+}
+
+thead th {
+  padding: 0.6rem 0.8rem;
+  background: #49505a;
+  font-size: 1.65rem;
+  font-family: 'Teko', sans-serif;
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-align: left;
+  color: #e3e7ea;
+}
+
+thead th:first-child {
+  border-radius: 14px 0 0 14px;
+}
+
+thead th:last-child {
+  border-radius: 0 14px 14px 0;
+}
+
+tbody td {
+  padding: 0.6rem 0.8rem;
+  font-size: 1.35rem;
+  font-family: 'Teko', sans-serif;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.actions-head {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.actions-cell {
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.action-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.action-btn-accept {
+  background: #39f45a;
+  color: #093316;
+}
+
+.action-btn-delete {
+  background: #d86464;
+  color: #2f0f0f;
+}
+
+.empty-row {
+  padding: 1rem;
+  font-family: 'Sora', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  color: #2f3337;
+}
+
+@media (max-width: 760px) {
+  .signup-panel {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 680px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-body {
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-left: max(1rem, env(safe-area-inset-left));
+  }
+
+  .signup-shell h1 {
+    font-size: 3rem;
+  }
+}

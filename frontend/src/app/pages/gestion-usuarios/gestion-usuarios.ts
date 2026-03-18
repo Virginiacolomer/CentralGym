@@ -3,7 +3,7 @@ import { PageHeaderCompactComponent } from '../../shared/page-header-compact/pag
 import { PageBgComponent } from '../../shared/page-bg/page-bg';
 
 type MembershipType = '3xsemana' | '2xsemana' | 'pase libre';
-type PaymentState = 'alDia' | 'porVencer' | 'cuotaPendiente';
+type PaymentState = 'alDia' | 'cuotaPendiente';
 
 type ManagedUser = {
   id: number;
@@ -30,30 +30,30 @@ export class GestionUsuarios {
 
   users: ManagedUser[] = [
     this.createUser(1, 'Maria Virginia', 'Colomer Prevotel', '45700085', 'alDia', '3xsemana'),
-    this.createUser(2, 'Juan Pablo', 'Lopez', '12345689', 'porVencer', '2xsemana'),
+    this.createUser(2, 'Juan Pablo', 'Lopez', '12345689', 'cuotaPendiente', '2xsemana'),
     this.createUser(3, 'Sandra', 'Herrera', '98564785', 'alDia', 'pase libre'),
     this.createUser(4, 'Pedro', 'Gutierrez', '64523154', 'cuotaPendiente', '3xsemana'),
     this.createUser(5, 'Lautaro', 'Gimenez', '40123789', 'alDia', '2xsemana'),
-    this.createUser(6, 'Camila', 'Roldan', '39222881', 'porVencer', '3xsemana'),
+    this.createUser(6, 'Camila', 'Roldan', '39222881', 'cuotaPendiente', '3xsemana'),
     this.createUser(7, 'Micaela', 'Ferreyra', '41336210', 'alDia', 'pase libre'),
     this.createUser(8, 'Andres', 'Vera', '36774001', 'cuotaPendiente', '2xsemana'),
     this.createUser(9, 'Luciana', 'Correa', '42876093', 'alDia', '3xsemana'),
     this.createUser(10, 'Nicolas', 'Arce', '37650444', 'alDia', '2xsemana'),
-    this.createUser(11, 'Rocio', 'Montes', '42999003', 'porVencer', 'pase libre'),
+    this.createUser(11, 'Rocio', 'Montes', '42999003', 'cuotaPendiente', 'pase libre'),
     this.createUser(12, 'Sofia', 'Leguizamon', '44122877', 'alDia', '3xsemana'),
     this.createUser(13, 'Thiago', 'Molina', '45890812', 'cuotaPendiente', '2xsemana'),
     this.createUser(14, 'Aylin', 'Sosa', '44777120', 'alDia', 'pase libre'),
-    this.createUser(15, 'Agustin', 'Palacios', '38990345', 'porVencer', '3xsemana'),
+    this.createUser(15, 'Agustin', 'Palacios', '38990345', 'cuotaPendiente', '3xsemana'),
     this.createUser(16, 'Valentina', 'Caceres', '43678111', 'alDia', '2xsemana'),
     this.createUser(17, 'Bruno', 'Ramos', '40228974', 'alDia', '3xsemana'),
     this.createUser(18, 'Milagros', 'Bustamante', '44989002', 'cuotaPendiente', 'pase libre'),
     this.createUser(19, 'Renzo', 'Cruz', '39557100', 'alDia', '2xsemana'),
-    this.createUser(20, 'Karen', 'Diaz', '41773492', 'porVencer', '3xsemana'),
+    this.createUser(20, 'Karen', 'Diaz', '41773492', 'cuotaPendiente', '3xsemana'),
     this.createUser(21, 'Ezequiel', 'Pereyra', '38651002', 'alDia', '2xsemana'),
     this.createUser(22, 'Julieta', 'Dominguez', '43219870', 'alDia', 'pase libre'),
     this.createUser(23, 'Franco', 'Silva', '40444971', 'cuotaPendiente', '3xsemana'),
     this.createUser(24, 'Noelia', 'Mendez', '42331145', 'alDia', '2xsemana'),
-    this.createUser(25, 'Gonzalo', 'Castro', '39128831', 'porVencer', 'pase libre'),
+    this.createUser(25, 'Gonzalo', 'Castro', '39128831', 'cuotaPendiente', 'pase libre'),
     this.createUser(26, 'Carolina', 'Campos', '44667213', 'alDia', '3xsemana'),
     this.createUser(27, 'Mateo', 'Ruiz', '43888231', 'alDia', '2xsemana'),
     this.createUser(28, 'Bianca', 'Acosta', '45111701', 'cuotaPendiente', '3xsemana'),
@@ -140,10 +140,6 @@ export class GestionUsuarios {
   getStatusLabel(status: PaymentState): string {
     if (status === 'alDia') {
       return 'Al dia';
-    }
-
-    if (status === 'porVencer') {
-      return 'Por vencer';
     }
 
     return 'Cuota pendiente';

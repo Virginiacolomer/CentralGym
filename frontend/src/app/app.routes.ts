@@ -6,8 +6,10 @@ import { Register } from './pages/register/register';
 import { MenuAdmin } from './pages/menu-admin/menu-admin';
 import { MenuCliente } from './pages/menu-cliente/menu-cliente';
 import { GestionUsuarios } from './pages/gestion-usuarios/gestion-usuarios';
+import { AltaUsuarios } from './pages/alta-usuarios/alta-usuarios';
 import { GestionMembresias } from './pages/gestion-membresias/gestion-membresias';
 import { AsignarPlan } from './pages/asignar-plan/asignar-plan';
+import { CrearPlan } from './pages/crear-plan/crear-plan';
 import { CambiarMembresia } from './pages/cambiar-membresia/cambiar-membresia';
 import { EditarPlan } from './pages/editar-plan/editar-plan';
 import { VerPlan } from './pages/ver-plan/ver-plan';
@@ -26,8 +28,10 @@ export const routes: Routes = [
 	{ path: 'menu-admin', component: MenuAdmin },
 	{ path: 'menu-cliente', component: MenuCliente },
 	{ path: 'gestion-usuarios', component: GestionUsuarios },
+	{ path: 'alta-usuarios', component: AltaUsuarios },
 	{ path: 'gestion-membresias', component: GestionMembresias },
 	{ path: 'asignar-plan', component: AsignarPlan },
+	{ path: 'crear-plan', component: CrearPlan },
 	{ path: 'cambiar-membresia', component: CambiarMembresia },
 	{ path: 'editar-plan', component: EditarPlan },
 	{ path: 'ver-plan', component: VerPlan },

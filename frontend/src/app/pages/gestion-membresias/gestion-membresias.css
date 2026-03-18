@@ -110,6 +110,51 @@ tbody tr:last-child td {
 	outline: 0;
 }
 
+.name-input {
+	min-width: 150px;
+	padding: 0.25rem 0.42rem;
+	border: 1px solid rgba(46, 53, 60, 0.58);
+	border-radius: 8px;
+	background: #dce1e5;
+	color: #1d2125;
+	font-family: 'Sora', sans-serif;
+	font-size: 0.95rem;
+	font-weight: 500;
+	line-height: 1.2;
+	outline: 0;
+	text-transform: uppercase;
+}
+
+.name-input::placeholder {
+	color: rgba(29, 33, 37, 0.6);
+	font-weight: 400;
+}
+
+.days-cell {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.42rem;
+}
+
+.days-value {
+	min-width: 48px;
+	display: inline-block;
+}
+
+.days-input {
+	width: 70px;
+	padding: 0.1rem 0.38rem;
+	border: 1px solid rgba(46, 53, 60, 0.58);
+	border-radius: 8px;
+	background: #dce1e5;
+	color: #1d2125;
+	font-family: 'Teko', sans-serif;
+	font-size: 1.6rem;
+	line-height: 1;
+	letter-spacing: 0.01em;
+	outline: 0;
+}
+
 .icon-button {
 	display: inline-flex;
 	align-items: center;
@@ -160,6 +205,33 @@ tbody tr:last-child td {
 	width: 14px;
 	height: 14px;
 	display: block;
+}
+
+.add-membership-btn {
+	margin-top: 0.85rem;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.45rem;
+	padding: 0.5rem 1rem;
+	border: 0;
+	border-radius: 999px;
+	background: #8ee45d;
+	color: #0c1c10;
+	font-family: 'Sora', sans-serif;
+	font-size: 0.95rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	cursor: pointer;
+	transition: filter 140ms ease;
+}
+
+.add-membership-btn:hover {
+	filter: brightness(1.04);
+}
+
+.add-membership-btn .fi {
+	font-size: 1.1rem;
+	line-height: 1;
 }
 
 @media (max-width: 780px) {

@@ -44,16 +44,9 @@
                           <a
                             class="action-btn view-btn"
                             routerLink="/ver-plan"
-                            [queryParams]="{ usuario: user.firstName + ' ' + user.lastName }"
+                            [queryParams]="{ usuario: user.firstName + ' ' + user.lastName, frecuencia: user.membershipFrequency }"
                           >
-                            Ver plan
-                          </a>
-                          <a
-                            class="action-btn edit-btn"
-                            routerLink="/editar-plan"
-                            [queryParams]="{ usuario: user.firstName + ' ' + user.lastName }"
-                          >
-                            Cambiar plan
+                            Ver y editar
                           </a>
                         </div>
                       </td>

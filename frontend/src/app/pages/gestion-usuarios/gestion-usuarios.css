@@ -160,11 +160,6 @@ tbody tr:last-child td {
 	color: #0d2a16;
 }
 
-.status-pill-warning {
-	background: #e4c45b;
-	color: #2b260f;
-}
-
 .status-pill-danger {
 	background: #d86464;
 	color: #2f0f0f;

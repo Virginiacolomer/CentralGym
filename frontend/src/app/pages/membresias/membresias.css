@@ -160,6 +160,75 @@
   color: #e8ecef;
 }
 
+.hours-card {
+  margin-top: 1.2rem;
+  padding: 1.15rem 1.2rem;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    linear-gradient(140deg, rgba(57, 244, 90, 0.18), rgba(57, 244, 90, 0) 36%),
+    #050708;
+  max-width: 520px;
+}
+
+.hours-card h2 {
+  margin: 0 0 0.8rem;
+  font-family: 'Teko', sans-serif;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+.hours-block h3 {
+  margin: 0 0 0.55rem;
+  font-family: 'Teko', sans-serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 0.88;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+.slot {
+  margin-bottom: 0.9rem;
+}
+
+.slot:last-child {
+  margin-bottom: 0;
+}
+
+.slot span {
+  display: block;
+  margin-bottom: 0.15rem;
+  font-size: 1.55rem;
+  line-height: 1;
+  color: #8df45d;
+  font-family: 'Teko', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.slot strong,
+.hours-block--compact strong {
+  display: block;
+  font-size: clamp(2.05rem, 5vw, 3.3rem);
+  line-height: 0.94;
+  letter-spacing: 0.01em;
+  color: #edf1f3;
+  font-family: 'Teko', sans-serif;
+}
+
+.hours-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.24);
+  margin: 1rem 0;
+}
+
+.hours-block--compact {
+  text-align: left;
+}
+
 .image-card {
   border: 5px solid transparent;
   border-radius: 30px;
@@ -232,6 +301,14 @@
   .image-card img {
     height: 410px;
   }
+
+  .hours-card {
+    max-width: 100%;
+  }
+
+  .slot span {
+    font-size: 1.35rem;
+  }
 }
 
 @media (max-width: 460px) {
@@ -265,6 +342,32 @@
 
   .members-copy p {
     font-size: 1.25rem;
+  }
+
+  .hours-card {
+    padding: 1rem 0.9rem;
+    border-radius: 20px;
+  }
+
+  .hours-card h2 {
+    margin-bottom: 0.65rem;
+  }
+
+  .hours-block h3 {
+    font-size: 2.2rem;
+  }
+
+  .slot {
+    margin-bottom: 0.75rem;
+  }
+
+  .slot span {
+    font-size: 1.15rem;
+  }
+
+  .slot strong,
+  .hours-block--compact strong {
+    font-size: 2.35rem;
   }
 
   .image-card img {
