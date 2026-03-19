@@ -17,6 +17,9 @@ import { MiPlan } from './pages/mi-plan/mi-plan';
 import { MiMembresia } from './pages/mi-membresia/mi-membresia';
 import { MisPagos } from './pages/mis-pagos/mis-pagos';
 import { HistorialDePagos } from './pages/historial-de-pagos/historial-de-pagos';
+import { SeguimientoPersonalizado } from './pages/seguimiento-personalizado/seguimiento-personalizado';
+import { SeguimientoDetalle } from './pages/seguimiento-detalle/seguimiento-detalle';
+import { SeguimientoCliente } from './pages/seguimiento-cliente/seguimiento-cliente';
 // Configuracion de rutas de toda la aplicacion.
 export const routes: Routes = [
 	// Ruta raiz: cuando entras a / muestra la pagina de inicio.
@@ -39,6 +42,9 @@ export const routes: Routes = [
 	{ path: 'mi-membresia', component: MiMembresia },
 	{ path: 'mis-pagos', component: MisPagos },
 	{ path: 'historial-de-pagos', component: HistorialDePagos },
+	{ path: 'seguimiento-personalizado', component: SeguimientoPersonalizado },
+	{ path: 'seguimiento-personalizado/:id', component: SeguimientoDetalle },
+	{ path: 'seguimiento-cliente', component: SeguimientoCliente },
 	// Comodin: cualquier URL no existente redirige al home.
 	{ path: '**', redirectTo: '' },
 ];

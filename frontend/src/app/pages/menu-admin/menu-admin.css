@@ -11,7 +11,7 @@
 .page-body {
 	display: flex;
 	justify-content: center;
-	padding: 1rem max(1.25rem, env(safe-area-inset-right)) calc(3rem + env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
+	padding: 0.8rem max(1.25rem, env(safe-area-inset-right)) calc(1.8rem + env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
 }
 
 .admin-menu {
@@ -19,8 +19,8 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 2rem;
-	padding-top: clamp(2rem, 8vw, 4.2rem);
+	gap: 1.7rem;
+	padding-top: clamp(1.3rem, 6vw, 3.2rem);
 	font-family: 'Sora', sans-serif;
 }
 
@@ -80,6 +80,13 @@
 .icon-badge .fi {
 	font-size: 1.45rem;
 	line-height: 1;
+	color: #2f3134;
+}
+
+.icon-badge svg {
+	width: 1.45rem;
+	height: 1.45rem;
+	display: block;
 	color: #2f3134;
 }
 
@@ -182,7 +189,7 @@
 
 	.admin-menu {
 		gap: 1.45rem;
-		padding-top: 1.25rem;
+		padding-top: 0.95rem;
 	}
 
 	.admin-menu h1 {

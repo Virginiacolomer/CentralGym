@@ -1,0 +1,68 @@
+<app-page-bg>
+  <main class="page-with-compact-header">
+    <app-page-header-compact backHref="/menu-admin"></app-page-header-compact>
+    <section class="page-body">
+      <div class="follow-up-shell">
+        <h1>Seguimiento personalizado</h1>
+
+        <div class="follow-up-panel">
+          <div class="table-wrap">
+            <table aria-label="Tabla de clientes con seguimiento personalizado">
+              <thead>
+                <tr>
+                  <th>Nombre y apellido</th>
+                  <th>DNI</th>
+                  <th>Estado del pago</th>
+                  <th>Accion</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (client of clients; track client.id) {
+                  <tr>
+                    <td>{{ client.fullName }}</td>
+                    <td>{{ client.dni }}</td>
+                    <td>
+                      <div class="status-cell">
+                        <div class="status-main">
+                          <span
+                            class="status-pill"
+                            [class.status-pill-ok]="client.paymentState === 'alDia'"
+                            [class.status-pill-danger]="client.paymentState === 'cuotaPendiente'"
+                          >
+                            {{ getStatusLabel(client.paymentState) }}
+                          </span>
+
+                          @if (client.paymentState !== 'alDia') {
+                            <button
+                              type="button"
+                              class="currency-action"
+                              aria-label="Poner cuota al dia"
+                              title="Poner al dia"
+                              (click)="makeStatusUpToDate(client.id)"
+                            >
+                              <span class="currency-symbol" aria-hidden="true">$</span>
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        class="follow-action"
+                        [routerLink]="['/seguimiento-personalizado', client.id]"
+                        [queryParams]="{ name: client.fullName }"
+                      >
+                        Seguimiento
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</app-page-bg>

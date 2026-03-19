@@ -87,6 +87,13 @@
 	color: #2f3134;
 }
 
+.icon-badge svg {
+	width: 1.45rem;
+	height: 1.45rem;
+	display: block;
+	color: #2f3134;
+}
+
 .icon {
 	position: relative;
 	display: block;
