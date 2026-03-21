@@ -18,7 +18,7 @@ import { SeguimientoModule } from './modules/seguimiento/seguimiento.module';
         type: 'postgres',
         url: configService.get<string>('DATABASE_URL'),
         autoLoadEntities: true,
-        synchronize: true, // solo dev
+        synchronize: false, // solo dev
         ssl: { rejectUnauthorized: false },
       }),
       inject: [ConfigService],
