@@ -6,14 +6,14 @@ import { AuthModule } from './modules/auth/auth.module';
 import { MembresiaModule } from './modules/membresia/membresia.module';
 import { PlanEntrenamientoModule } from './modules/plan-entrenamiento/plan-entrenamiento.module';
 import { SeguimientoModule } from './modules/seguimiento/seguimiento.module';
-
+import { AppController } from './app.controller';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
+      imports: [ConfigModule,AppController],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get<string>('DATABASE_URL'),
