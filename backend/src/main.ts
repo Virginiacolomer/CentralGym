@@ -7,6 +7,6 @@ async function bootstrap() {
   // 🔹 importante para frontend en Vercel después
   app.enableCors();
 console.log('PORT:', process.env.PORT);
-await app.listen(process.env.PORT || 3000, '0.0.0.0');
+await app.listen(3000, '0.0.0.0');
 }
 bootstrap();
