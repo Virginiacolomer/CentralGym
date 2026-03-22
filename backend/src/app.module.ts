@@ -8,12 +8,14 @@ import { PlanEntrenamientoModule } from './modules/plan-entrenamiento/plan-entre
 import { SeguimientoModule } from './modules/seguimiento/seguimiento.module';
 import { AppController } from './app.controller';
 @Module({
+  controllers: [AppController],
+  providers: [],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule,AppController],
+      imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get<string>('DATABASE_URL'),
