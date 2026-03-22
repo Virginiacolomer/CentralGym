@@ -9,4 +9,13 @@ export class AppController {
       message: 'Backend funcionando 🚀',
     };
   }
+
+  @Get('health')
+  getHealth() {
+    return {
+      status: 'ok',
+      service: 'backend',
+      timestamp: new Date().toISOString(),
+    };
+  }
 }
