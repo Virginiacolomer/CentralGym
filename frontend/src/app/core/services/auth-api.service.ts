@@ -14,7 +14,7 @@ export interface RegisterUserRequest {
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {
   private readonly http = inject(HttpClient);
-  private readonly apiBaseUrl = environment.apiBaseUrl;
+  private readonly apiBaseUrl = environment.apiBaseUrl.replace(/\/+$/, '');
 
   register(payload: RegisterUserRequest): Observable<unknown> {
     return this.http.post(`${this.apiBaseUrl}/users`, payload);
