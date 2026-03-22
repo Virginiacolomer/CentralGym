@@ -22,6 +22,21 @@ export class SeguimientoController {
     return this.seguimientoService.findOne(+id);
   }
 
+  @Get('tests/:id')
+  findTestById(@Param('id') id: string) {
+    return this.seguimientoService.findTestById(+id);
+  }
+
+  @Get('unidades-medida/:id')
+  findUnidadMedidaById(@Param('id') id: string) {
+    return this.seguimientoService.findUnidadMedidaById(+id);
+  }
+
+  @Get('valores/:id')
+  findValorById(@Param('id') id: string) {
+    return this.seguimientoService.findValorById(+id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateSeguimientoDto: UpdateSeguimientoDto) {
     return this.seguimientoService.update(+id, updateSeguimientoDto);

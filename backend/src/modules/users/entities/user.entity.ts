@@ -1,7 +1,10 @@
 import { Membresia } from 'src/modules/membresia/entities/membresia.entity';
+import { Pago } from 'src/modules/membresia/entities/pago.entity';
+import { UserMembresia } from 'src/modules/membresia/entities/userMembresia.entity';
 import { PlanEntrenamiento } from 'src/modules/plan-entrenamiento/entities/plan-entrenamiento.entity';
 import { Seguimiento } from 'src/modules/seguimiento/entities/seguimiento.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany } from 'typeorm';
+import { UserRole } from '../enums/user-role.enum';
 
 @Entity({ name: 'user', schema: 'public' })
 export class User {
@@ -17,19 +20,31 @@ export class User {
   @Column()
   dni: string;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Column({ name: 'password_hash' })
   password_hash: string;
 
-  @OneToOne(() => Seguimiento, seguimiento => seguimiento.user)
-  seguimiento: Seguimiento;
+  @Column({ 
+    type: 'enum', 
+    enum: UserRole, 
+    default: UserRole.CLIENTE 
+  })
+  role: UserRole;
 
-  @OneToMany(() => Membresia, membresia => membresia.user)
-  membresias: Membresia[];
+  @OneToOne(() => Seguimiento, seguimiento => seguimiento.user, { nullable: true })
+  seguimiento: Seguimiento | null;
 
-  @OneToOne(() => PlanEntrenamiento, planEntrenamiento => planEntrenamiento.user)
-  planEntrenamiento: PlanEntrenamiento;
+  @OneToMany(() => UserMembresia, userMembresia => userMembresia.user)
+  userMembresias: UserMembresia[];
 
+  // Relacion de conveniencia para consultas con join explicito
+  membresias?: Membresia[];
+
+  @OneToMany(() => Pago, pago => pago.user)
+  pagos: Pago[];
+
+  @OneToOne(() => PlanEntrenamiento, planEntrenamiento => planEntrenamiento.user, { nullable: true })
+  planEntrenamiento: PlanEntrenamiento | null;
 }

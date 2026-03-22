@@ -1,7 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
 import { TipoMembresia } from './tipoMembresia.entity';
 import { Pago } from './pago.entity';
-import { User } from 'src/modules/users/entities/user.entity';
+import { UserMembresia } from './userMembresia.entity';
 
 @Entity({ name: 'membresia', schema: 'public' })
 export class Membresia {
@@ -17,12 +17,12 @@ export class Membresia {
     @Column ()
     costo: number;
 
-    @ManyToOne(() => TipoMembresia, tipoMembresia => tipoMembresia.id)
+    @ManyToOne(() => TipoMembresia, tipoMembresia => tipoMembresia.membresias)
     tipoMembresia: TipoMembresia;
 
     @OneToMany(() => Pago, pago => pago.membresia)
     pagos: Pago[];
 
-    @ManyToOne(() => User, user => user.id)
-    user: User;
+    @OneToMany(() => UserMembresia, userMembresia => userMembresia.membresia)
+    userMembresias: UserMembresia[];
 }

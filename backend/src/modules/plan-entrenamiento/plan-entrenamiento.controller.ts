@@ -22,6 +22,26 @@ export class PlanEntrenamientoController {
     return this.planEntrenamientoService.findOne(+id);
   }
 
+  @Get('dias/:id')
+  findDiaById(@Param('id') id: string) {
+    return this.planEntrenamientoService.findDiaById(+id);
+  }
+
+  @Get('ejercicios/:id')
+  findEjercicioById(@Param('id') id: string) {
+    return this.planEntrenamientoService.findEjercicioById(+id);
+  }
+
+  @Get('ejercicios-dia/:id')
+  findEjercicioDiaById(@Param('id') id: string) {
+    return this.planEntrenamientoService.findEjercicioDiaById(+id);
+  }
+
+  @Get('grupos-musculares/:id')
+  findGrupoMuscularById(@Param('id') id: string) {
+    return this.planEntrenamientoService.findGrupoMuscularById(+id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePlanEntrenamientoDto: UpdatePlanEntrenamientoDto) {
     return this.planEntrenamientoService.update(+id, updatePlanEntrenamientoDto);

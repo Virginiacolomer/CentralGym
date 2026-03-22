@@ -22,6 +22,21 @@ export class MembresiaController {
     return this.membresiaService.findOne(+id);
   }
 
+  @Get('pagos/:id')
+  findPagoById(@Param('id') id: string) {
+    return this.membresiaService.findPagoById(+id);
+  }
+
+  @Get('tipos/:id')
+  findTipoMembresiaById(@Param('id') id: string) {
+    return this.membresiaService.findTipoMembresiaById(+id);
+  }
+
+  @Get('estados/:id')
+  findEstadoUserMembresiaById(@Param('id') id: string) {
+    return this.membresiaService.findEstadoUserMembresiaById(+id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateMembresiaDto: UpdateMembresiaDto) {
     return this.membresiaService.update(+id, updateMembresiaDto);
