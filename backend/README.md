@@ -2,6 +2,22 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
+## Deploy en Railway
+
+Configuracion incluida en este proyecto:
+
+- Archivo de plataforma: railway.json
+- Variables de entorno ejemplo: .env.example
+- Healthcheck: /health
+
+Pasos recomendados:
+
+1. Crear servicio Node.js en Railway desde este repositorio.
+2. Configurar Root Directory en backend.
+3. Definir variables de entorno segun .env.example.
+4. Confirmar que DATABASE_URL apunte al Postgres de Railway.
+5. Deployar y verificar /health.
+
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 

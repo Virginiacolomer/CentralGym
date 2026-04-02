@@ -2,6 +2,25 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.2.
 
+## Deploy en Vercel
+
+Configuracion incluida en este proyecto:
+
+- Archivo de plataforma: vercel.json
+- Build command: npm run build
+- Output directory: dist/frontend/browser
+
+Pasos recomendados:
+
+1. Importar este repositorio en Vercel.
+2. Configurar Root Directory en frontend.
+3. Deployar.
+
+Importante:
+
+- El frontend de produccion usa src/environments/environment.prod.ts para apiBaseUrl.
+- Si cambia la URL del backend, actualizar ese archivo y volver a deployar.
+
 ## Development server
 
 To start a local development server, run:
