@@ -40,7 +40,7 @@
 	flex-direction: column;
 	align-items: center;
 	gap: 0.85rem;
-	margin-bottom: auto;
+	margin-bottom: 2rem;
 }
 
 .status-pill {
@@ -102,6 +102,107 @@
 	font-weight: 800;
 }
 
+.current-payments-panel {
+	width: min(100%, 680px);
+	margin-bottom: auto;
+	padding: 1.25rem;
+	border-radius: 28px;
+	background: rgba(82, 89, 96, 0.78);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+	text-align: left;
+}
+
+.current-payments-header {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 1rem;
+}
+
+.current-payments-header h2 {
+	margin: 0;
+	font-family: 'Teko', sans-serif;
+	font-size: clamp(2rem, 4vw, 2.8rem);
+	line-height: 0.9;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	color: #eceef0;
+}
+
+.payments-count {
+	color: rgba(236, 238, 240, 0.78);
+	font-size: 0.95rem;
+	font-weight: 600;
+}
+
+.current-payments-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+}
+
+.payment-card {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1rem 1.1rem;
+	border-radius: 20px;
+	background: rgba(33, 37, 41, 0.42);
+}
+
+.payment-month,
+.payment-type,
+.payment-date,
+.current-payments-error,
+.current-payments-empty {
+	margin: 0;
+	color: rgba(236, 238, 240, 0.8);
+}
+
+.payment-month {
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #39f45a;
+}
+
+.payment-card h3 {
+	margin: 0.25rem 0 0;
+	font-size: 1.08rem;
+	color: #f3f4f5;
+}
+
+.payment-type {
+	margin-top: 0.25rem;
+	font-size: 0.92rem;
+}
+
+.payment-date {
+	margin-top: 0.22rem;
+	font-size: 0.88rem;
+	color: rgba(236, 238, 240, 0.68);
+}
+
+.payment-amount {
+	font-size: 1rem;
+	color: #f3f4f5;
+	white-space: nowrap;
+}
+
+.current-payments-empty {
+	padding: 0.95rem 0;
+	text-align: center;
+}
+
+.current-payments-error {
+	padding: 0.95rem 0;
+	text-align: center;
+	color: #ffd7d7;
+}
+
 .history-link {
 	display: inline-flex;
 	align-items: center;
@@ -123,6 +224,10 @@
 
 	.payments-shell h1 {
 		margin-bottom: 2.75rem;
+	}
+
+	.current-payments-panel {
+		padding: 1rem;
 	}
 }
 
@@ -155,6 +260,16 @@
 	.status-detail,
 	.next-payment {
 		font-size: 0.98rem;
+	}
+
+	.current-payments-header,
+	.payment-card {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.payment-amount {
+		font-size: 1.05rem;
 	}
 }
 

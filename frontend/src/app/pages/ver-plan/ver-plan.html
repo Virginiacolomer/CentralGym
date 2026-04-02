@@ -5,6 +5,14 @@
       <div class="plan-shell">
         <h1>Plan {{ selectedUserName }}</h1>
 
+        @if (statusMessage) {
+          <p class="status-message" role="status" aria-live="polite">{{ statusMessage }}</p>
+        }
+
+        @if (isLoading) {
+          <p class="status-message" role="status" aria-live="polite">Cargando plan...</p>
+        }
+
         <section class="plan-days" aria-label="Rutina semanal">
           @for (day of days; track day.label; let index = $index) {
             <article class="day-block">
@@ -116,14 +124,35 @@
               <span>Cancelar</span>
             </button>
           } @else {
-            <button type="button" class="edit-btn" (click)="startEditing()">
+            <button type="button" class="edit-btn" [disabled]="days.length === 0 || isLoading" (click)="startEditing()">
               <span class="icon" aria-hidden="true"></span>
               <span>Editar plan</span>
             </button>
-            <button type="button" class="download-btn">
+            <button type="button" class="download-btn" [disabled]="days.length === 0 || isLoading" (click)="downloadPdf()">
               <span class="download-icon" aria-hidden="true"></span>
               <span>Descargar PDF</span>
             </button>
+            @if (dbPlans.length > 0) {
+              <div class="assign-db-section">
+                <label class="assign-db-label">Asignar plan existente:</label>
+                <div class="assign-db-controls">
+                  <select [(ngModel)]="selectedDbPlanId" class="assign-db-select">
+                    <option [ngValue]="null">-- Seleccionar plan --</option>
+                    @for (plan of dbPlans; track plan.id) {
+                      <option [ngValue]="plan.id">{{ plan.nombre }}</option>
+                    }
+                  </select>
+                  <button
+                    type="button"
+                    class="assign-db-btn"
+                    (click)="assignDbPlan()"
+                    [disabled]="!selectedDbPlanId || isAssigning || isLoading"
+                  >
+                    {{ isAssigning ? 'Asignando...' : 'Asignar' }}
+                  </button>
+                </div>
+              </div>
+            }
           }
         </div>
       </div>

@@ -6,7 +6,7 @@ export class EstadoUserMembresia {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column({ type: 'text', unique: true })
   nombre: string;
 
   @OneToMany(() => UserMembresia, userMembresia => userMembresia.estado)

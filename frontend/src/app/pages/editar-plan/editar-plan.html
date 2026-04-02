@@ -5,6 +5,14 @@
       <div class="plan-shell">
         <h1>Plan {{ selectedUserName }}</h1>
 
+        @if (statusMessage) {
+          <p class="status-message" role="status" aria-live="polite">{{ statusMessage }}</p>
+        }
+
+        @if (isLoading) {
+          <p class="status-message" role="status" aria-live="polite">Cargando plan...</p>
+        }
+
         <section class="plan-days" aria-label="Edicion de rutina semanal">
           @for (day of days; track day.label; let dayIndex = $index) {
             <article class="day-block">
@@ -56,7 +64,9 @@
           }
         </section>
 
-        <a class="confirm-btn" routerLink="/asignar-plan">Confirmar</a>
+        @if (days.length > 0) {
+          <a class="confirm-btn" routerLink="/asignar-plan">Confirmar</a>
+        }
       </div>
     </section>
   </main>

@@ -1,8 +1,15 @@
-import { Component } from '@angular/core';
+﻿import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { forkJoin, finalize } from 'rxjs';
 import { PageHeaderCompactComponent } from '../../shared/page-header-compact/page-header-compact';
 import { PageBgComponent } from '../../shared/page-bg/page-bg';
+import {
+  CatalogoGrupoMuscular,
+  PlanEntrenamientoApiService,
+  PlanEntrenamientoResponse,
+} from '../../core/services/plan-entrenamiento-api.service';
 
 type ExerciseRow = {
   exercise: string;
@@ -29,12 +36,25 @@ type PredefinedPlan = {
   templateUrl: './ver-plan.html',
   styleUrl: './ver-plan.css',
 })
-export class VerPlan {
+export class VerPlan implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly planEntrenamientoApiService = inject(PlanEntrenamientoApiService);
+  private readonly cdr = inject(ChangeDetectorRef);
+
   selectedUserName = 'Usuario';
+  selectedUserId: number | null = null;
   isEditing = false;
+  isLoading = false;
+  statusMessage = '';
   membershipFrequency = 1;
   availablePlans: PredefinedPlan[] = [];
   selectedPlanId = '';
+  dbPlans: PlanEntrenamientoResponse[] = [];
+  selectedDbPlanId: number | null = null;
+  isAssigning = false;
+  currentPlan: PlanEntrenamientoResponse | null = null;
+  private readonly exerciseNameById = new Map<number, string>();
+  private readonly exerciseIdByNormalizedName = new Map<string, number>();
 
   days: TrainingDay[] = [
     {
@@ -150,17 +170,26 @@ export class VerPlan {
 
   private originalDays: TrainingDay[] = [];
 
-  constructor(private readonly route: ActivatedRoute) {
+  constructor() {
+    this.saveOriginalDays();
+  }
+
+  ngOnInit(): void {
     this.route.queryParamMap.subscribe((params) => {
       const userName = params.get('usuario')?.trim();
       this.selectedUserName = userName && userName.length > 0 ? userName : 'Usuario';
+
+      const userId = Number(params.get('userId'));
+      this.selectedUserId = Number.isFinite(userId) && userId > 0 ? userId : null;
+
       const frecuencia = params.get('frecuencia');
       if (frecuencia) {
         this.membershipFrequency = parseInt(frecuencia, 10) || 1;
-        this.loadAvailablePlans();
       }
+      this.loadAvailablePlans();
+      this.loadDbPlans();
+      this.loadUserPlan();
     });
-    this.saveOriginalDays();
   }
 
   loadAvailablePlans(): void {
@@ -168,22 +197,7 @@ export class VerPlan {
   }
 
   get exerciseOptions(): string[] {
-    const planExercises = this.predefinedPlans.flatMap((plan) =>
-      plan.days.flatMap((day) => day.exercises.map((row) => row.exercise.trim())),
-    );
-    const currentExercises = this.days.flatMap((day) => day.exercises.map((row) => row.exercise.trim()));
-
-    const unique = new Map<string, string>();
-    [...planExercises, ...currentExercises]
-      .filter((name) => name.length > 0)
-      .forEach((name) => {
-        const key = this.normalizeText(name);
-        if (!unique.has(key)) {
-          unique.set(key, name);
-        }
-      });
-
-    return Array.from(unique.values()).sort((a, b) => a.localeCompare(b, 'es-AR'));
+    return Array.from(this.exerciseNameById.values()).sort((a, b) => a.localeCompare(b, 'es-AR'));
   }
 
   assignPredefinedPlan(): void {
@@ -207,6 +221,31 @@ export class VerPlan {
 
     this.selectedPlanId = '';
     this.saveOriginalDays();
+  }
+
+  assignDbPlan(): void {
+    if (!this.selectedUserId || !this.selectedDbPlanId) return;
+    if (!window.confirm('Â¿Confirmar asignaciÃ³n de este plan al usuario?')) return;
+
+    this.isAssigning = true;
+    this.statusMessage = '';
+    this.cdr.markForCheck();
+
+    this.planEntrenamientoApiService
+      .assignPlanToUser(this.selectedUserId, this.selectedDbPlanId)
+      .pipe(finalize(() => { this.isAssigning = false; this.cdr.detectChanges(); }))
+      .subscribe({
+        next: () => {
+          this.statusMessage = 'Plan asignado correctamente.';
+          this.selectedDbPlanId = null;
+          this.loadUserPlan();
+        },
+        error: (err: HttpErrorResponse) => {
+          const msg = err.error?.message;
+          this.statusMessage = Array.isArray(msg) ? msg.join(', ') : (msg || 'Error al asignar el plan.');
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   addExerciseRow(dayIndex: number): void {
@@ -263,8 +302,151 @@ export class VerPlan {
   }
 
   savePlan(): void {
-    this.isEditing = false;
-    this.saveOriginalDays();
+    if (!this.selectedUserId) {
+      this.statusMessage = 'No se pudo identificar al usuario para guardar cambios.';
+      return;
+    }
+
+    if (!this.currentPlan) {
+      this.statusMessage = 'No hay plan cargado para guardar cambios.';
+      return;
+    }
+
+    try {
+      const payload = this.buildUserEditedPlanPayload();
+
+      this.isLoading = true;
+      this.cdr.markForCheck();
+
+      this.planEntrenamientoApiService
+        .updatePlanForUser(this.selectedUserId, payload)
+        .pipe(
+          finalize(() => {
+            this.isLoading = false;
+            this.cdr.detectChanges();
+          }),
+        )
+        .subscribe({
+          next: () => {
+            this.isEditing = false;
+            this.statusMessage = 'Plan del usuario actualizado y guardado como plan editado.';
+            this.loadUserPlan();
+          },
+          error: (err: HttpErrorResponse) => {
+            const msg = err.error?.message;
+            this.statusMessage = Array.isArray(msg)
+              ? msg.join(', ')
+              : msg || 'No se pudo guardar el plan editado del usuario.';
+            this.cdr.detectChanges();
+          },
+        });
+    } catch (error) {
+      this.statusMessage =
+        error instanceof Error ? error.message : 'No se pudieron validar los cambios del plan.';
+      this.cdr.detectChanges();
+    }
+  }
+
+  private loadDbPlans(): void {
+    this.planEntrenamientoApiService.getAllPlans().subscribe({
+      next: (plans) => {
+        this.dbPlans = plans;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        // Non-critical â€” dropdown simply stays empty
+      },
+    });
+  }
+
+  private loadUserPlan(): void {
+    if (!this.selectedUserId) {
+      this.statusMessage = 'No se pudo identificar al usuario para cargar el plan.';
+      this.days = [];
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.isLoading = true;
+    this.statusMessage = '';
+    this.cdr.markForCheck();
+
+    forkJoin({
+      catalogo: this.planEntrenamientoApiService.getCatalogoGruposMusculares(),
+      planData: this.planEntrenamientoApiService.getPlanByUserId(this.selectedUserId),
+    })
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: ({ catalogo, planData }: { catalogo: CatalogoGrupoMuscular[]; planData: { plan: PlanEntrenamientoResponse | null } }) => {
+          this.buildExerciseNameMap(catalogo);
+          const response = planData;
+
+          if (!response.plan) {
+            this.days = [];
+            this.currentPlan = null;
+            this.statusMessage = 'Este usuario no tiene un plan de entrenamiento asignado.';
+            this.saveOriginalDays();
+            this.cdr.detectChanges();
+            return;
+          }
+
+          this.currentPlan = response.plan;
+          this.days = this.mapPlanToDays(response.plan);
+          this.saveOriginalDays();
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.days = [];
+          this.currentPlan = null;
+          this.statusMessage = 'No se pudo cargar el plan del usuario.';
+          this.saveOriginalDays();
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  private mapPlanToDays(plan: PlanEntrenamientoResponse): TrainingDay[] {
+    return Array.from({ length: plan.cantidadDias }, (_, dayIndex) => {
+      const ejerciciosDia = plan.ejercicios[dayIndex];
+      const repeticionesDia = plan.repeticiones[dayIndex];
+
+      if (!Array.isArray(ejerciciosDia) || ejerciciosDia.length === 0) {
+        return {
+          label: `Dia ${dayIndex + 1}`,
+          expanded: false,
+          exercises: [],
+        };
+      }
+
+      return {
+        label: `Dia ${dayIndex + 1}`,
+        expanded: false,
+        exercises: ejerciciosDia.map((id, exerciseIndex) => ({
+          exercise: this.resolveExerciseName(id),
+          workload: Array.isArray(repeticionesDia) ? (repeticionesDia[exerciseIndex] ?? '') : '',
+        })),
+      };
+    });
+  }
+
+  private buildExerciseNameMap(grupos: CatalogoGrupoMuscular[]): void {
+    this.exerciseNameById.clear();
+    this.exerciseIdByNormalizedName.clear();
+    for (const grupo of grupos) {
+      for (const ejercicio of grupo.ejercicios) {
+        this.exerciseNameById.set(ejercicio.id, ejercicio.nombre);
+        this.exerciseIdByNormalizedName.set(this.normalizeText(ejercicio.nombre), ejercicio.id);
+      }
+    }
+  }
+
+  private resolveExerciseName(id: number): string {
+    return this.exerciseNameById.get(id) ?? `Ejercicio ${id}`;
   }
 
   private saveOriginalDays(): void {
@@ -282,5 +464,185 @@ export class VerPlan {
       .toLowerCase()
       .trim();
   }
+
+  private buildUserEditedPlanPayload() {
+    if (!this.currentPlan) {
+      throw new Error('No hay plan base para generar el plan editado.');
+    }
+
+    if (this.days.length === 0) {
+      throw new Error('El plan debe tener al menos un dia cargado.');
+    }
+
+    const cantidadDias = this.days.length;
+    const ejercicios: Array<number[] | null> = Array.from({ length: 7 }, (_, dayIndex) => {
+      if (dayIndex >= cantidadDias) {
+        return null;
+      }
+
+      const day = this.days[dayIndex];
+      const rows = day?.exercises ?? [];
+      if (rows.length === 0) {
+        throw new Error(`El ${day?.label ?? `Dia ${dayIndex + 1}`} debe tener al menos un ejercicio.`);
+      }
+
+      return rows.map((row, rowIndex) => {
+        const normalizedName = this.normalizeText(row.exercise);
+        const exerciseId = this.exerciseIdByNormalizedName.get(normalizedName);
+        if (!exerciseId) {
+          throw new Error(
+            `Ejercicio invalido en ${day.label}, fila ${rowIndex + 1}. Selecciona un ejercicio del catalogo.`,
+          );
+        }
+        return exerciseId;
+      });
+    });
+
+    const repeticiones: Array<string[] | null> = Array.from({ length: 7 }, (_, dayIndex) => {
+      if (dayIndex >= cantidadDias) {
+        return null;
+      }
+
+      const day = this.days[dayIndex];
+      const rows = day?.exercises ?? [];
+      if (rows.length === 0) {
+        throw new Error(`El ${day?.label ?? `Dia ${dayIndex + 1}`} no tiene repeticiones cargadas.`);
+      }
+
+      return rows.map((row, rowIndex) => {
+        const valor = row.workload.trim();
+        if (!valor) {
+          throw new Error(`La repeticion en ${day.label}, fila ${rowIndex + 1} es obligatoria.`);
+        }
+        return valor;
+      });
+    });
+
+    return {
+      nombre: this.currentPlan.nombre,
+      descripcion: this.currentPlan.descripcion ?? undefined,
+      cantidadDias,
+      ejercicios,
+      repeticiones,
+    };
+  }
+
+  async downloadPdf(): Promise<void> {
+    if (this.days.length === 0) {
+      return;
+    }
+
+    const { jsPDF } = await import('jspdf');
+    const document = new jsPDF({ unit: 'mm', format: 'a4' });
+    const pageWidth = document.internal.pageSize.getWidth();
+    const pageHeight = document.internal.pageSize.getHeight();
+    const margin = 16;
+    const contentWidth = pageWidth - margin * 2;
+    let cursorY = 60;
+
+    const ensureSpace = (requiredHeight: number) => {
+      if (cursorY + requiredHeight <= pageHeight - margin) {
+        return;
+      }
+
+      document.addPage();
+      cursorY = 24;
+    };
+
+    const addParagraph = (text: string, fontSize = 11, extraGap = 4) => {
+      const lines = document.splitTextToSize(text, contentWidth);
+      document.setFontSize(fontSize);
+      document.text(lines, margin, cursorY);
+      cursorY += lines.length * (fontSize * 0.45) + extraGap;
+    };
+
+    document.setFillColor(16, 19, 20);
+    document.rect(0, 0, pageWidth, 46, 'F');
+
+    const logoDataUrl = await this.loadLogoDataUrl();
+
+    if (logoDataUrl) {
+      try {
+        document.addImage(logoDataUrl, 'PNG', margin, 10, 28, 28);
+      } catch {
+        // Si el logo falla, el PDF se genera igual solo con tipografia.
+      }
+    }
+
+    document.setTextColor(57, 244, 90);
+    document.setFont('helvetica', 'bold');
+    document.setFontSize(24);
+    document.text('Central Gym', logoDataUrl ? 50 : margin, 22);
+
+    document.setTextColor(237, 241, 243);
+    document.setFont('helvetica', 'normal');
+    document.setFontSize(11);
+    document.text('Plan de entrenamiento del alumno', logoDataUrl ? 50 : margin, 30);
+
+    document.setDrawColor(57, 244, 90);
+    document.setLineWidth(0.8);
+    document.line(margin, 46, pageWidth - margin, 46);
+
+    document.setTextColor(16, 19, 20);
+    document.setFont('helvetica', 'normal');
+    addParagraph(`Alumno: ${this.selectedUserName}`, 13, 6);
+
+    for (const day of this.days) {
+      ensureSpace(18);
+      document.setFont('helvetica', 'bold');
+      document.setFontSize(14);
+      document.text(day.label, margin, cursorY);
+      cursorY += 7;
+
+      document.setFont('helvetica', 'normal');
+      document.setFontSize(11);
+
+      if (day.exercises.length === 0) {
+        addParagraph('Sin ejercicios cargados.', 11, 3);
+        continue;
+      }
+
+      for (const [index, exercise] of day.exercises.entries()) {
+        const line = `${index + 1}. ${exercise.exercise} - ${exercise.workload}`;
+        const lines = document.splitTextToSize(line, contentWidth);
+        ensureSpace(lines.length * 6 + 2);
+        document.text(lines, margin + 2, cursorY);
+        cursorY += lines.length * 5 + 2;
+      }
+
+      cursorY += 4;
+    }
+
+    const safeUserName = this.selectedUserName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/gi, '-')
+      .replace(/^-+|-+$/g, '') || 'usuario';
+
+    document.save(`plan-${safeUserName}.pdf`);
+  }
+
+  private async loadLogoDataUrl(): Promise<string | null> {
+    try {
+      const response = await fetch('/images/Central%20Gym.png');
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const blob = await response.blob();
+      return await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error('No se pudo leer el logo.'));
+        reader.readAsDataURL(blob);
+      });
+    } catch {
+      return null;
+    }
+  }
 }
+
+
+
+
 

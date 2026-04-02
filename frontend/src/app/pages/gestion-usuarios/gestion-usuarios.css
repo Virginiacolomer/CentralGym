@@ -41,6 +41,17 @@
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
+.status-message {
+	margin: 0 0 0.6rem;
+	padding: 0.55rem 0.7rem;
+	border-radius: 10px;
+	background: rgba(49, 56, 63, 0.5);
+	color: #f1f5f8;
+	font-size: 0.9rem;
+	font-weight: 600;
+	font-family: 'Sora', sans-serif;
+}
+
 .filter-box {
 	position: relative;
 	width: min(100%, 420px);
@@ -142,6 +153,10 @@ tbody tr:last-child td {
 	gap: 0.38rem;
 }
 
+.membership-cell {
+	gap: 0.46rem;
+}
+
 .status-pill,
 .membership-pill {
 	display: inline-flex;
@@ -211,6 +226,17 @@ tbody tr:last-child td {
 .mini-action:hover {
 	background: rgba(235, 239, 242, 0.32);
 	border-color: rgba(49, 55, 61, 0.75);
+}
+
+.danger-action {
+	background: rgba(216, 100, 100, 0.2);
+	border-color: rgba(166, 44, 44, 0.68);
+	color: #4d1717;
+}
+
+.danger-action:hover {
+	background: rgba(216, 100, 100, 0.34);
+	border-color: rgba(166, 44, 44, 0.9);
 }
 
 .membership-editor {

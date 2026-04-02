@@ -1,26 +1,57 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { User } from '../users/entities/user.entity';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
-  }
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+  async login(loginDto: LoginDto) {
+    // BUSCAR USUARIO POR EMAIL
+    const user = await this.userRepository.findOne({
+      where: { email: loginDto.email.trim().toLowerCase() },
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+    if (!user) {
+      throw new NotFoundException('El correo electronico no esta registrado.');
+    }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
+    // VERIFICAR CONTRASEÑA
+    const passwordValid = await bcrypt.compare(
+      loginDto.password,
+      user.password_hash,
+    );
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    if (!passwordValid) {
+      throw new UnauthorizedException('La contrasena es incorrecta.');
+    }
+
+    // RESPUESTA: Devolver usuario SIN password_hash
+    const { password_hash, ...result } = user;
+    const accessToken = await this.jwtService.signAsync(
+      {
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+      },
+      {
+        secret: this.configService.get<string>('JWT_SECRET') || 'central-gym-dev-secret',
+      },
+    );
+
+    return {
+      accessToken,
+      user: result,
+    };
   }
 }

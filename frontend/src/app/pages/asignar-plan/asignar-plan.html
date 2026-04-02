@@ -6,6 +6,10 @@
         <h1>Asignar plan</h1>
 
         <div class="assign-panel">
+          @if (statusMessage) {
+            <p class="status-message" role="status" aria-live="polite">{{ statusMessage }}</p>
+          }
+
           <div class="filter-box">
             <label class="sr-only" for="user-search">Filtrar usuarios</label>
             <input
@@ -29,7 +33,11 @@
                 </tr>
               </thead>
               <tbody>
-                @if (filteredUsers.length === 0) {
+                @if (isLoading) {
+                  <tr>
+                    <td class="no-results" colspan="4">Cargando usuarios...</td>
+                  </tr>
+                } @else if (filteredUsers.length === 0) {
                   <tr>
                     <td class="no-results" colspan="4">No se encontraron usuarios para la busqueda.</td>
                   </tr>
@@ -44,7 +52,7 @@
                           <a
                             class="action-btn view-btn"
                             routerLink="/ver-plan"
-                            [queryParams]="{ usuario: user.firstName + ' ' + user.lastName, frecuencia: user.membershipFrequency }"
+                            [queryParams]="{ userId: user.id, usuario: user.firstName + ' ' + user.lastName, frecuencia: user.membershipFrequency }"
                           >
                             Ver y editar
                           </a>

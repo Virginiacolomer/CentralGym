@@ -1,4 +1,4 @@
-<app-page-bg>
+﻿<app-page-bg>
   <main class="page-with-compact-header">
     <app-page-header-compact backHref="/menu-admin"></app-page-header-compact>
 
@@ -9,13 +9,17 @@
         <div class="create-plan-panel">
           <p>Completá los datos para dar de alta una nueva opcion de plan.</p>
 
+          @if (isLoadingCatalog) {
+            <p>Cargando ejercicios...</p>
+          }
+
           <label>
             Titulo
             <input type="text" placeholder="Ej: Plan fuerza inicial" [(ngModel)]="planTitle" />
           </label>
 
           <label>
-            Frecuencia (cantidad de dias)
+            Cantidad de dias
             <input
               type="number"
               min="1"
@@ -53,72 +57,65 @@
 
                   @if (day.expanded) {
                     <div class="day-fields">
-                      @for (exercise of day.exercises; track $index; let exerciseIndex = $index) {
+                      @for (row of day.rows; track $index; let rowIndex = $index) {
                         <div class="exercise-row">
                           <label>
                             Grupo muscular
                             <select
-                              [(ngModel)]="exercise.muscleGroup"
-                              (ngModelChange)="onMuscleGroupChange(index, exerciseIndex)"
+                              [(ngModel)]="row.muscleGroupId"
+                              (ngModelChange)="onMuscleGroupChange(index, rowIndex)"
                             >
-                              <option value="">Seleccionar grupo</option>
-                              @for (group of muscleGroups; track group) {
-                                <option [value]="group">{{ group }}</option>
+                              <option [ngValue]="null">Seleccionar grupo</option>
+                              @for (group of muscleGroups; track group.id) {
+                                <option [ngValue]="group.id">{{ group.nombre }}</option>
                               }
                             </select>
                           </label>
 
                           <label>
                             Ejercicio
-                            <div class="exercise-picker-inline">
-                              <select [(ngModel)]="exercise.exercise" [disabled]="!exercise.muscleGroup">
-                                <option value="">Seleccionar ejercicio</option>
-                                @for (option of getExercisesForGroup(exercise.muscleGroup); track option) {
-                                  <option [value]="option">{{ option }}</option>
-                                }
-                                <option [value]="otherExerciseValue">Otro</option>
-                              </select>
-
-                              @if (isOtherExerciseSelected(exercise)) {
-                                <div class="custom-exercise-inline">
-                                  <input
-                                    type="text"
-                                    placeholder="Nombre del ejercicio"
-                                    [(ngModel)]="exercise.customExerciseName"
-                                  />
-                                  <button
-                                    type="button"
-                                    class="save-custom-btn"
-                                    (click)="addCustomExercise(index, exerciseIndex)"
-                                  >
-                                    Agregar
-                                  </button>
-                                </div>
+                            <select
+                              [(ngModel)]="row.ejercicioId"
+                              [disabled]="!row.muscleGroupId"
+                              (ngModelChange)="onExerciseChange(index, rowIndex)"
+                            >
+                              <option [ngValue]="null">Seleccionar ejercicio</option>
+                              @for (ejercicio of getExercisesForGroup(row.muscleGroupId); track ejercicio.id) {
+                                <option [ngValue]="ejercicio.id">{{ ejercicio.nombre }}</option>
                               }
-                            </div>
+                              <option [ngValue]="-1">OTRO (escribir nuevo)</option>
+                            </select>
                           </label>
 
+                          @if (isCustomExerciseSelected(row)) {
+                            <label>
+                              Nuevo ejercicio
+                              <input
+                                type="text"
+                                placeholder="Ej: PRESS MILITAR"
+                                [ngModel]="row.customExerciseName"
+                                (ngModelChange)="onCustomExerciseInput(index, rowIndex, $event)"
+                              />
+                            </label>
+                          }
+
                           <label>
-                            Series y repeticiones
-                            <input
-                              type="text"
-                              placeholder="Ej: 4x12"
-                              [(ngModel)]="exercise.workload"
-                            />
+                            Repeticiones
+                            <input type="text" placeholder="Ej: 4x12" [(ngModel)]="row.repeticiones" />
                           </label>
 
                           <button
                             type="button"
                             class="remove-row-btn"
-                            [disabled]="day.exercises.length === 1"
-                            (click)="removeExercise(index, exerciseIndex)"
+                            [disabled]="day.rows.length === 1"
+                            (click)="removeRow(index, rowIndex)"
                           >
                             Quitar ejercicio
                           </button>
                         </div>
                       }
 
-                      <button type="button" class="add-row-btn" (click)="addExercise(index)">
+                      <button type="button" class="add-row-btn" (click)="addRow(index)">
                         + Agregar ejercicio
                       </button>
                     </div>
@@ -130,9 +127,17 @@
 
           <div class="submit-section">
             @if (savingStatus) {
-              <span class="saving-status">{{ savingStatus }}</span>
+              <span
+                class="saving-status"
+                [class.status-success]="savingStatusType === 'success'"
+                [class.status-error]="savingStatusType === 'error'"
+                role="status"
+                aria-live="polite"
+              >{{ savingStatus }}</span>
             }
-            <button type="button" class="create-submit-btn" (click)="savePlan()">Crear plan</button>
+            <button type="button" class="create-submit-btn" [disabled]="isSaving" (click)="savePlan()">
+              {{ isSaving ? 'Guardando...' : 'Crear plan' }}
+            </button>
           </div>
         </div>
       </article>

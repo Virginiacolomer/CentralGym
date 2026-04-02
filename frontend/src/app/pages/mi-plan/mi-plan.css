@@ -4,6 +4,10 @@
 	display: block;
 }
 
+.is-hidden {
+	display: none !important;
+}
+
 .page-with-compact-header {
 	min-height: 100svh;
 }
@@ -33,6 +37,49 @@
 	text-transform: uppercase;
 	color: #39f45a;
 	text-align: center;
+}
+
+.status-banner {
+	width: 100%;
+	margin: 0 0 1rem;
+	padding: 0.9rem 1rem;
+	border-radius: 16px;
+	background: rgba(81, 88, 98, 0.92);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+	color: #edf1f3;
+	font-size: 0.95rem;
+	line-height: 1.45;
+}
+
+.status-banner-error {
+	background: rgba(148, 46, 46, 0.9);
+	color: #ffe7e7;
+}
+
+.plan-summary {
+	width: 100%;
+	margin: 0 0 1.25rem;
+	padding: 1rem 1.1rem;
+	border-radius: 18px;
+	background: rgba(81, 88, 98, 0.92);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+	color: #edf1f3;
+}
+
+.plan-summary h2 {
+	margin: 0 0 0.45rem;
+	font-family: 'Teko', sans-serif;
+	font-size: clamp(2rem, 5vw, 2.6rem);
+	line-height: 0.95;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	color: #39f45a;
+}
+
+.plan-summary p {
+	margin: 0;
+	font-size: 0.98rem;
+	line-height: 1.5;
 }
 
 .plan-days {
@@ -238,5 +285,53 @@ thead th:last-child {
 
 	table {
 		font-size: 0.86rem;
+	}
+}
+
+.no-plan-message {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 300px;
+	padding: 2rem;
+	border-radius: 18px;
+	background: rgba(81, 88, 98, 0.92);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+	margin-bottom: auto;
+}
+
+.no-plan-message p {
+	margin: 0;
+	font-size: 1.2rem;
+	color: #edf1f3;
+	text-align: center;
+	line-height: 1.6;
+	letter-spacing: 0.02em;
+}
+
+.loading-message {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 300px;
+	padding: 2rem;
+	color: #edf1f3;
+	font-size: 1.1rem;
+	text-align: center;
+	margin-bottom: auto;
+}
+
+@media (max-width: 480px) {
+	.no-plan-message {
+		min-height: 200px;
+		padding: 1.5rem;
+	}
+
+	.no-plan-message p {
+		font-size: 1rem;
+	}
+
+	.loading-message {
+		min-height: 200px;
 	}
 }

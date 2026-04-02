@@ -1,20 +1,34 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { Membresia } from './membresia.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn } from 'typeorm';
 import { User } from 'src/modules/users/entities/user.entity';
+import { Membresia } from './membresia.entity';
+import { UserMembresia } from './userMembresia.entity';
 
 @Entity({ name: 'pago', schema: 'public' })
 export class Pago {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
-    mes: number;
+    @Column({ name: 'user_id', type: 'int', nullable: true })
+    userId: number | null;
 
-    @ManyToOne(() => Membresia, membresia => membresia.pagos)
-    @JoinColumn({ name: 'membresia_id' })
-    membresia: Membresia;
+    @Column({ name: 'user_membresia_id', type: 'int', nullable: true })
+    userMembresiaId: number | null;
 
-    @ManyToOne(() => User, user => user.pagos, { nullable: true })
+    @Column({ name: 'membresiaId', type: 'int', nullable: true })
+    membresiaId: number | null;
+
+    @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+    createdAt: Date;
+
+    @ManyToOne(() => User, user => user.pagos, { nullable: true, onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
     user: User | null;
+
+    @ManyToOne(() => UserMembresia, userMembresia => userMembresia.pagos, { nullable: true })
+    @JoinColumn({ name: 'user_membresia_id' })
+    userMembresia: UserMembresia | null;
+
+    @ManyToOne(() => Membresia, { nullable: true })
+    @JoinColumn({ name: 'membresiaId' })
+    membresia: Membresia | null;
 }

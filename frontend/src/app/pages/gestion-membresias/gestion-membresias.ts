@@ -1,17 +1,25 @@
-import { Component } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { PageHeaderCompactComponent } from '../../shared/page-header-compact/page-header-compact';
 import { PageBgComponent } from '../../shared/page-bg/page-bg';
+import { Membresia, MembresiaApiService, TipoMembresia } from '../../core/services/membresia-api.service';
 
 interface MembershipOption {
-  id: number;
+  id: number | null;
   name: string;
   draftName: string;
   amount: number;
   draftAmount: string;
   frequency: number;
   draftFrequency: string;
+  typeId: number | null;
+  draftTypeId: number | null;
   isEditing: boolean;
+  isNew: boolean;
+  isSaving: boolean;
+  isDeleting: boolean;
 }
 
 @Component({
@@ -20,14 +28,19 @@ interface MembershipOption {
   templateUrl: './gestion-membresias.html',
   styleUrl: './gestion-membresias.css',
 })
-export class GestionMembresias {
-  memberships: MembershipOption[] = [
-    { id: 1, name: 'PASE LIBRE', draftName: 'PASE LIBRE', amount: 55000, draftAmount: '55000', frequency: 7, draftFrequency: '7', isEditing: false },
-    { id: 2, name: '2 X SEMANA', draftName: '2 X SEMANA', amount: 50000, draftAmount: '50000', frequency: 2, draftFrequency: '2', isEditing: false },
-    { id: 3, name: '3 X SEMANA', draftName: '3 X SEMANA', amount: 40000, draftAmount: '40000', frequency: 3, draftFrequency: '3', isEditing: false },
-  ];
+export class GestionMembresias implements OnInit {
+  private readonly membresiaApiService = inject(MembresiaApiService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
-  private nextId = 4;
+  memberships: MembershipOption[] = [];
+  membershipTypes: TipoMembresia[] = [];
+  isLoading = false;
+  statusMessage = '';
+
+  ngOnInit(): void {
+    this.loadMembershipTypes();
+    this.loadMemberships();
+  }
 
   startEditing(id: number): void {
     const membership = this.memberships.find((item) => item.id === id);
@@ -39,55 +52,222 @@ export class GestionMembresias {
     membership.draftName = membership.name;
     membership.draftAmount = String(membership.amount);
     membership.draftFrequency = String(membership.frequency);
+    membership.draftTypeId = membership.typeId;
   }
 
-  saveMembership(id: number): void {
+  saveMembership(id: number | null): void {
     const membership = this.memberships.find((item) => item.id === id);
     if (!membership) {
       return;
     }
 
-    if (membership.draftName.trim()) {
-      membership.name = membership.draftName.trim();
-    }
-
+    const normalizedName = membership.draftName.trim();
     const parsedAmount = this.parseAmount(membership.draftAmount);
-    if (parsedAmount !== null) {
-      membership.amount = parsedAmount;
-    }
-
     const parsedFrequency = this.parseDays(membership.draftFrequency);
-    if (parsedFrequency !== null) {
-      membership.frequency = parsedFrequency;
+    const parsedTypeId = this.parseTypeId(membership.draftTypeId);
+
+    if (!normalizedName) {
+      window.alert('Debes ingresar un nombre para la membresia.');
+      return;
     }
 
-    membership.isEditing = false;
-    membership.draftName = membership.name;
-    membership.draftAmount = String(membership.amount);
-    membership.draftFrequency = String(membership.frequency);
+    if (parsedAmount === null) {
+      window.alert('Debes ingresar un costo valido para la membresia.');
+      return;
+    }
+
+    if (parsedFrequency === null) {
+      window.alert('Debes ingresar una frecuencia valida para la membresia.');
+      return;
+    }
+
+    if (parsedTypeId === null) {
+      window.alert('Debes seleccionar un tipo de membresia.');
+      return;
+    }
+
+    const payload = {
+      nombre: normalizedName,
+      costo: parsedAmount,
+      dias: parsedFrequency,
+      tipoMembresiaId: parsedTypeId,
+    };
+
+    membership.isSaving = true;
+    this.cdr.detectChanges();
+
+    const request$ = membership.isNew
+      ? this.membresiaApiService.createMembership(payload)
+      : this.membresiaApiService.updateMembership(id!, payload);
+
+    request$
+      .pipe(
+        finalize(() => {
+          membership.isSaving = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.statusMessage = membership.isNew
+            ? 'Membresia creada correctamente.'
+            : 'Membresia actualizada correctamente.';
+          this.loadMemberships();
+        },
+        error: (error) => {
+          window.alert(this.getErrorMessage(error, 'No se pudo guardar la membresia.'));
+        },
+      });
   }
 
   addNewMembership(): void {
+    if (this.memberships.some((membership) => membership.isNew && membership.isEditing)) {
+      return;
+    }
+
     const newMembership: MembershipOption = {
-      id: this.nextId++,
+      id: null,
       name: '',
       draftName: '',
       amount: 0,
       draftAmount: '0',
       frequency: 1,
       draftFrequency: '1',
+      typeId: this.membershipTypes[0]?.id ?? null,
+      draftTypeId: this.membershipTypes[0]?.id ?? null,
       isEditing: true,
+      isNew: true,
+      isSaving: false,
+      isDeleting: false,
     };
 
-    this.memberships = [...this.memberships, newMembership];
+    this.memberships = [newMembership, ...this.memberships];
+  }
+
+  cancelEditing(id: number | null): void {
+    const membership = this.memberships.find((item) => item.id === id);
+    if (!membership) {
+      if (id === null) {
+        this.memberships = this.memberships.filter((item) => item.id !== null);
+      }
+      return;
+    }
+
+    if (membership.isNew) {
+      this.memberships = this.memberships.filter((item) => item !== membership);
+      return;
+    }
+
+    membership.isEditing = false;
+    membership.draftName = membership.name;
+    membership.draftAmount = String(membership.amount);
+    membership.draftFrequency = String(membership.frequency);
+    membership.draftTypeId = membership.typeId;
   }
 
   deleteMembership(id: number): void {
-    this.memberships = this.memberships.filter((membership) => membership.id !== id);
+    const membership = this.memberships.find((item) => item.id === id);
+    if (!membership || membership.isDeleting) {
+      return;
+    }
+
+    const confirmed = window.confirm(`¿Seguro que deseas eliminar la membresia ${membership.name}?`);
+    if (!confirmed) {
+      return;
+    }
+
+    membership.isDeleting = true;
+    this.cdr.detectChanges();
+
+    this.membresiaApiService
+      .deleteMembership(id)
+      .pipe(
+        finalize(() => {
+          membership.isDeleting = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.statusMessage = 'Membresia eliminada correctamente.';
+          this.loadMemberships();
+        },
+        error: (error) => {
+          window.alert(this.getErrorMessage(error, 'No se pudo eliminar la membresia.'));
+        },
+      });
   }
 
   formatAmount(amount: number): string {
     return `$${amount.toLocaleString('es-AR')}`;
+  }
+
+  getTypeName(typeId: number | null): string {
+    return this.membershipTypes.find((type) => type.id === typeId)?.nombre ?? 'Sin tipo';
+  }
+
+  trackMembership(_: number, membership: MembershipOption): number | string {
+    return membership.id ?? `new-${membership.draftName}-${membership.draftAmount}`;
+  }
+
+  private loadMemberships(): void {
+    this.isLoading = true;
+    this.statusMessage = '';
+    this.cdr.markForCheck();
+
+    this.membresiaApiService
+      .getAllMemberships()
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (memberships) => {
+          this.memberships = memberships.map((membership) => this.mapMembership(membership));
+          if (this.memberships.length === 0) {
+            this.statusMessage = 'No hay membresias cargadas.';
+          }
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.statusMessage = this.getErrorMessage(error, 'No se pudieron cargar las membresias.');
+          this.memberships = [];
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  private loadMembershipTypes(): void {
+    this.membresiaApiService.getAllMembershipTypes().subscribe({
+      next: (types) => {
+        this.membershipTypes = types;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.membershipTypes = [];
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private mapMembership(membership: Membresia): MembershipOption {
+    return {
+      id: membership.id,
+      name: membership.nombre,
+      draftName: membership.nombre,
+      amount: membership.costo,
+      draftAmount: String(membership.costo),
+      frequency: membership.dias,
+      draftFrequency: String(membership.dias),
+      typeId: membership.tipoMembresia?.id ?? null,
+      draftTypeId: membership.tipoMembresia?.id ?? null,
+      isEditing: false,
+      isNew: false,
+      isSaving: false,
+      isDeleting: false,
+    };
   }
 
   private parseAmount(input: string): number | null {
@@ -118,6 +298,27 @@ export class GestionMembresias {
     return Math.round(numericValue);
   }
 
+  private parseTypeId(input: number | null): number | null {
+    if (input === null || !Number.isFinite(input) || input <= 0) {
+      return null;
+    }
 
+    return Math.round(input);
+  }
+
+  private getErrorMessage(error: unknown, fallback: string): string {
+    if (error instanceof HttpErrorResponse) {
+      const backendMessage = error.error?.message;
+      if (Array.isArray(backendMessage) && backendMessage.length > 0) {
+        return backendMessage[0];
+      }
+
+      if (typeof backendMessage === 'string' && backendMessage.trim()) {
+        return backendMessage;
+      }
+    }
+
+    return fallback;
+  }
 }
 

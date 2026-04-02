@@ -5,6 +5,14 @@
       <div class="detail-shell">
         <h1>Seguimiento personalizado</h1>
 
+        @if (isLoading) {
+          <p class="status-note">Cargando tests...</p>
+        }
+
+        @if (!isLoading && statusMessage) {
+          <p class="status-note">{{ statusMessage }}</p>
+        }
+
         <div class="metrics-grid">
           @for (metric of metrics; track metric.key) {
             <article class="metric-card">

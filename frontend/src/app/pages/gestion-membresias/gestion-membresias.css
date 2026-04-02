@@ -39,12 +39,31 @@
 	border-radius: 24px;
 	padding: 0.62rem 0.95rem 0.85rem;
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+	overflow: hidden;
+}
+
+.table-wrap {
+	width: 100%;
+	overflow-x: auto;
+	border-radius: 18px;
+}
+
+.status-message {
+	margin: 0 0 0.9rem;
+	padding: 0.7rem 0.9rem;
+	border-radius: 14px;
+	background: rgba(56, 66, 75, 0.78);
+	color: #eef3f6;
+	font-family: 'Sora', sans-serif;
+	font-size: 0.95rem;
+	font-weight: 500;
 }
 
 table {
 	width: 100%;
 	border-collapse: collapse;
 	color: #191c20;
+	min-width: 760px;
 }
 
 thead th {
@@ -79,6 +98,10 @@ tbody td {
 	letter-spacing: 0.01em;
 	border-bottom: 1px solid rgba(239, 242, 244, 0.36);
 	vertical-align: middle;
+}
+
+.editing-row td {
+	background: rgba(222, 228, 233, 0.18);
 }
 
 tbody tr:last-child td {
@@ -123,6 +146,19 @@ tbody tr:last-child td {
 	line-height: 1.2;
 	outline: 0;
 	text-transform: uppercase;
+}
+
+.type-select {
+	min-width: 140px;
+	padding: 0.3rem 0.45rem;
+	border: 1px solid rgba(46, 53, 60, 0.58);
+	border-radius: 8px;
+	background: #dce1e5;
+	color: #1d2125;
+	font-family: 'Sora', sans-serif;
+	font-size: 0.92rem;
+	font-weight: 500;
+	outline: 0;
 }
 
 .name-input::placeholder {
@@ -176,7 +212,21 @@ tbody tr:last-child td {
 
 .action-cell {
 	text-align: right;
-	white-space: nowrap;
+	white-space: normal;
+	width: 1%;
+}
+
+.action-buttons {
+	display: inline-flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 0.45rem;
+	max-width: 180px;
+}
+
+.action-buttons--idle {
+	max-width: none;
 }
 
 .save-button {
@@ -186,15 +236,23 @@ tbody tr:last-child td {
 	padding: 0.36rem 0.72rem;
 	border: 0;
 	border-radius: 999px;
-	background: #babfc4;
-	color: #22262b;
+	background: #1d5f2a;
+	color: #eff7f1;
 	font-family: 'Sora', sans-serif;
-	font-size: 1.42rem;
-	font-weight: 500;
+	font-size: 0.84rem;
+	font-weight: 700;
 	line-height: 1;
 	text-transform: uppercase;
 	cursor: pointer;
 	transition: filter 140ms ease;
+}
+
+.save-button:disabled,
+.delete-button:disabled,
+.cancel-button:disabled,
+.add-membership-btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
 }
 
 .save-button:hover {
@@ -205,6 +263,44 @@ tbody tr:last-child td {
 	width: 14px;
 	height: 14px;
 	display: block;
+}
+
+.cancel-button {
+	padding: 0.36rem 0.72rem;
+	border: 0;
+	border-radius: 999px;
+	background: #5d6670;
+	color: #eef3f6;
+	font-family: 'Sora', sans-serif;
+	font-size: 0.84rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+.delete-button {
+	padding: 0.36rem 0.72rem;
+	border: 0;
+	border-radius: 999px;
+	background: #8c2f36;
+	color: #fff4f4;
+	font-family: 'Sora', sans-serif;
+	font-size: 0.84rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	cursor: pointer;
+	transition: filter 140ms ease;
+}
+
+.delete-button:hover {
+	filter: brightness(1.06);
+}
+
+.empty-state {
+	text-align: center;
+	font-family: 'Sora', sans-serif;
+	font-size: 1rem;
+	padding: 1.2rem;
 }
 
 .add-membership-btn {
@@ -240,8 +336,7 @@ tbody tr:last-child td {
 	}
 
 	table {
-		display: block;
-		overflow-x: auto;
+		min-width: 720px;
 	}
 
 	thead th,
@@ -258,7 +353,7 @@ tbody tr:last-child td {
 	}
 
 	.save-button {
-		font-size: 1.1rem;
+		font-size: 0.78rem;
 	}
 }
 

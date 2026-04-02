@@ -3,13 +3,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PlanEntrenamientoService } from './plan-entrenamiento.service';
 import { PlanEntrenamientoController } from './plan-entrenamiento.controller';
 import { PlanEntrenamiento } from './entities/plan-entrenamiento.entity';
-import { Dia } from './entities/dia.entity';
 import { Ejercicio } from './entities/ejercicio.entity';
-import { EjercicioDia } from './entities/ejercicioDia.entity';
 import { GrupoMuscular } from './entities/grupoMuscular.entity';
+import { User } from '../users/entities/user.entity';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PlanEntrenamiento, Dia, Ejercicio, EjercicioDia, GrupoMuscular])],
+  imports: [TypeOrmModule.forFeature([PlanEntrenamiento, Ejercicio, GrupoMuscular, User]), AuthModule],
   controllers: [PlanEntrenamientoController],
   providers: [PlanEntrenamientoService],
   exports: [TypeOrmModule],

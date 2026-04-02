@@ -114,6 +114,25 @@
 	border: 0;
 }
 
+.feedback-error {
+	color: #ff4757;
+	font-size: 0.9rem;
+	margin: 0.5rem 0 0;
+	text-align: center;
+}
+
+.feedback-success {
+	color: #39f45a;
+	font-size: 0.9rem;
+	margin: 0.5rem 0 0;
+	text-align: center;
+}
+
+.primary-action:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
 @media (max-width: 640px) {
 	.page-body {
 		padding-top: 0.9rem;

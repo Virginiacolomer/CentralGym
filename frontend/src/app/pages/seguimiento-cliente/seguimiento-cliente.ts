@@ -1,6 +1,9 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { finalize } from 'rxjs';
 import { PageHeaderCompactComponent } from '../../shared/page-header-compact/page-header-compact';
 import { PageBgComponent } from '../../shared/page-bg/page-bg';
+import { AuthStateService } from '../../core/services/auth-state.service';
+import { SeguimientoApiService, SeguimientoTestItem } from '../../core/services/seguimiento-api.service';
 
 type MonthlyValue = {
   month: string;
@@ -8,6 +11,7 @@ type MonthlyValue = {
 };
 
 type MetricCard = {
+  id: number;
   key: string;
   title: string;
   unit: string;
@@ -27,52 +31,77 @@ type TrendDot = {
   imports: [PageHeaderCompactComponent, PageBgComponent],
   templateUrl: './seguimiento-cliente.html',
   styleUrls: ['./seguimiento-cliente.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SeguimientoCliente {
-  readonly gridRows = [8, 18, 28, 38, 48, 58];
+export class SeguimientoCliente implements OnInit {
+  private readonly authStateService = inject(AuthStateService);
+  private readonly seguimientoApiService = inject(SeguimientoApiService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
-  metrics: MetricCard[] = [
-    {
-      key: 'peso',
-      title: 'Evolucion del peso',
-      unit: 'kg',
-      values: [
-        { month: 'Ene', value: 82 },
-        { month: 'Feb', value: 80.8 },
-        { month: 'Mar', value: 79.9 },
-      ],
-    },
-    {
-      key: 'imc',
-      title: 'Evolucion del IMC',
-      unit: '',
-      values: [
-        { month: 'Ene', value: 26.1 },
-        { month: 'Feb', value: 25.6 },
-        { month: 'Mar', value: 25.1 },
-      ],
-    },
-    {
-      key: 'salto',
-      title: 'Altura de salto',
-      unit: 'cm',
-      values: [
-        { month: 'Ene', value: 34 },
-        { month: 'Feb', value: 36 },
-        { month: 'Mar', value: 38 },
-      ],
-    },
-    {
-      key: 'fuerza',
-      title: 'Fuerza tren inferior',
-      unit: 'kg',
-      values: [
-        { month: 'Ene', value: 70 },
-        { month: 'Feb', value: 74 },
-        { month: 'Mar', value: 78 },
-      ],
-    },
-  ];
+  readonly gridRows = [8, 18, 28, 38, 48, 58];
+  statusMessage = '';
+  isLoading = false;
+
+  metrics: MetricCard[] = [];
+
+  ngOnInit(): void {
+    const userId = Number(this.authStateService.getCurrentUser()?.id);
+
+    if (!Number.isFinite(userId) || userId <= 0) {
+      this.statusMessage = 'No se pudo identificar al usuario para cargar el seguimiento.';
+      this.metrics = [];
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.loadTests(userId);
+  }
+
+  private loadTests(userId: number): void {
+    this.isLoading = true;
+    this.statusMessage = '';
+    this.metrics = [];
+    this.cdr.markForCheck();
+
+    this.seguimientoApiService
+      .getTestsByUserId(userId)
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        }),
+      )
+      .subscribe({
+        next: (tests) => {
+          this.metrics = tests.map((test) => this.mapTestToMetric(test));
+
+          if (this.metrics.length === 0) {
+            this.statusMessage = 'No hay test asociados al usuario.';
+          }
+
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.metrics = [];
+          this.statusMessage = 'No se pudieron cargar los tests del usuario.';
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  private mapTestToMetric(test: SeguimientoTestItem): MetricCard {
+    const monthlyValues = Array.isArray(test.valoresMensuales) ? test.valoresMensuales : [];
+    return {
+      id: test.id,
+      key: `test-${test.id}`,
+      title: test.nombre,
+      unit: test.unidad ?? '',
+      values: monthlyValues.map((value) => ({
+        month: value.mes,
+        value: Number(value.valor),
+      })),
+    };
+  }
 
   getGridColumns(totalPoints: number): number[] {
     return Array.from({ length: Math.max(totalPoints, 2) }, (_, index) => this.getPointX(index, Math.max(totalPoints, 2)));

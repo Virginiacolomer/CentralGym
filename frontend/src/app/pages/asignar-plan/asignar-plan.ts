@@ -1,9 +1,12 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { finalize } from 'rxjs';
 import { RouterLink } from '@angular/router';
 import { PageHeaderCompactComponent } from '../../shared/page-header-compact/page-header-compact';
 import { PageBgComponent } from '../../shared/page-bg/page-bg';
+import { ActiveClientUserItem, UsersApiService } from '../../core/services/users-api.service';
 
 type UserPlanRow = {
+  id: number;
   firstName: string;
   lastName: string;
   dni: string;
@@ -17,35 +20,19 @@ type UserPlanRow = {
   templateUrl: './asignar-plan.html',
   styleUrl: './asignar-plan.css',
 })
-export class AsignarPlan {
-  filterTerm = '';
+export class AsignarPlan implements OnInit {
+  private readonly usersApiService = inject(UsersApiService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
-  users: UserPlanRow[] = [
-    { firstName: 'Maria Virginia', lastName: 'Colomer Prevotel', dni: '45700085', membershipFrequency: 3 },
-    { firstName: 'Juan Pablo', lastName: 'Lopez', dni: '12345689', membershipFrequency: 2 },
-    { firstName: 'Sandra', lastName: 'Herrera', dni: '98564785', membershipFrequency: 3 },
-    { firstName: 'Pedro', lastName: 'Gutierrez', dni: '64523154', membershipFrequency: 7 },
-    { firstName: 'Lautaro', lastName: 'Gimenez', dni: '40123789', membershipFrequency: 2 },
-    { firstName: 'Camila', lastName: 'Roldan', dni: '39222881', membershipFrequency: 3 },
-    { firstName: 'Micaela', lastName: 'Ferreyra', dni: '41336210', membershipFrequency: 7 },
-    { firstName: 'Andres', lastName: 'Vera', dni: '36774001', membershipFrequency: 2 },
-    { firstName: 'Luciana', lastName: 'Correa', dni: '42876093', membershipFrequency: 3 },
-    { firstName: 'Nicolas', lastName: 'Arce', dni: '37650444', membershipFrequency: 2 },
-    { firstName: 'Rocio', lastName: 'Montes', dni: '42999003', membershipFrequency: 3 },
-    { firstName: 'Sofia', lastName: 'Leguizamon', dni: '44122877', membershipFrequency: 7 },
-    { firstName: 'Thiago', lastName: 'Molina', dni: '45890812', membershipFrequency: 2 },
-    { firstName: 'Aylin', lastName: 'Sosa', dni: '44777120', membershipFrequency: 3 },
-    { firstName: 'Agustin', lastName: 'Palacios', dni: '38990345', membershipFrequency: 7 },
-    { firstName: 'Valentina', lastName: 'Caceres', dni: '43678111', membershipFrequency: 2 },
-    { firstName: 'Bruno', lastName: 'Ramos', dni: '40228974', membershipFrequency: 3 },
-    { firstName: 'Milagros', lastName: 'Bustamante', dni: '44989002', membershipFrequency: 2 },
-    { firstName: 'Renzo', lastName: 'Cruz', dni: '39557100', membershipFrequency: 3 },
-    { firstName: 'Karen', lastName: 'Diaz', dni: '41773492', membershipFrequency: 7 },
-    { firstName: 'Ezequiel', lastName: 'Pereyra', dni: '38651002', membershipFrequency: 2 },
-    { firstName: 'Julieta', lastName: 'Dominguez', dni: '43219870', membershipFrequency: 3 },
-    { firstName: 'Franco', lastName: 'Silva', dni: '40444971', membershipFrequency: 2 },
-    { firstName: 'Noelia', lastName: 'Mendez', dni: '42331145', membershipFrequency: 7 },
-  ];
+  filterTerm = '';
+  isLoading = false;
+  statusMessage = '';
+
+  users: UserPlanRow[] = [];
+
+  ngOnInit(): void {
+    this.loadUsers();
+  }
 
   onFilterInput(value: string): void {
     this.filterTerm = value;
@@ -67,6 +54,48 @@ export class AsignarPlan {
         this.normalizeText(user.dni).includes(normalizedQuery)
       );
     });
+  }
+
+  private loadUsers(): void {
+    this.isLoading = true;
+    this.statusMessage = '';
+    console.log('[AsignarPlan] Cargando usuarios...');
+    this.cdr.markForCheck();
+
+    this.usersApiService
+      .getClientesActivos()
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (users) => {
+          console.log('[AsignarPlan] Respuesta usuarios:', users);
+          this.users = users.map((user) => this.mapActiveClientToPlanRow(user));
+          console.log('[AsignarPlan] Usuarios mapeados para tabla:', this.users);
+          if (this.users.length === 0) {
+            this.statusMessage = 'No hay usuarios para asignar plan.';
+          }
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('[AsignarPlan] Error al cargar usuarios:', error);
+          this.statusMessage = 'No se pudieron cargar los usuarios.';
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  private mapActiveClientToPlanRow(user: ActiveClientUserItem): UserPlanRow {
+    return {
+      id: user.id,
+      firstName: user.nombre,
+      lastName: user.apellido,
+      dni: user.dni,
+      membershipFrequency: user.frecuenciaDias,
+    };
   }
 
   private normalizeText(value: string): string {

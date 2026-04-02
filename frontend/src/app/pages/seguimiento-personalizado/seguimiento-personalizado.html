@@ -5,6 +5,99 @@
       <div class="follow-up-shell">
         <h1>Seguimiento personalizado</h1>
 
+        <div class="actions-row">
+          <button
+            type="button"
+            class="toggle-add-btn"
+            [class.toggle-add-btn-close]="isAddPanelOpen"
+            (click)="toggleAddPanel()"
+          >
+            {{ isAddPanelOpen ? 'Cerrar' : 'Agregar personas' }}
+          </button>
+        </div>
+
+        @if (isAddPanelOpen) {
+          <div class="add-panel">
+            <div class="add-controls">
+              <label for="seguimientoMembership">Membresia de seguimiento</label>
+              <select
+                id="seguimientoMembership"
+                [(ngModel)]="selectedSeguimientoMembershipId"
+                [disabled]="isLoadingMemberships || seguimientoMemberships.length === 0"
+              >
+                @for (membership of seguimientoMemberships; track membership.id) {
+                  <option [ngValue]="membership.id">
+                    {{ membership.nombre }} ({{ membership.dias }} dias)
+                  </option>
+                }
+              </select>
+
+              <label for="candidateSearch">Buscar persona</label>
+              <input
+                id="candidateSearch"
+                type="text"
+                [(ngModel)]="candidateSearch"
+                placeholder="Nombre o DNI"
+              />
+            </div>
+
+            @if (addStatusMessage) {
+              <p class="status-note">{{ addStatusMessage }}</p>
+            }
+
+            <div class="table-wrap add-table-wrap">
+              <table aria-label="Tabla de personas para agregar a seguimiento">
+                <thead>
+                  <tr>
+                    <th>Nombre y apellido</th>
+                    <th>DNI</th>
+                    <th>Membresia actual</th>
+                    <th>Accion</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (candidate of filteredCandidates; track candidate.id) {
+                    <tr>
+                      <td>{{ candidate.fullName }}</td>
+                      <td>{{ candidate.dni }}</td>
+                      <td>{{ candidate.currentMembership }}</td>
+                      <td>
+                        <button
+                          type="button"
+                          class="follow-action"
+                          (click)="addUserToSeguimiento(candidate.id)"
+                          [disabled]="assigningUserId === candidate.id || !selectedSeguimientoMembershipId"
+                        >
+                          {{ assigningUserId === candidate.id ? 'Agregando...' : 'Agregar' }}
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+        @if (isLoading) {
+          <p class="status-note">Cargando usuarios...</p>
+        }
+
+        @if (!isLoading && statusMessage) {
+          <p class="status-note">{{ statusMessage }}</p>
+        }
+
+        <div class="filter-box">
+          <input
+            id="clients-search"
+            type="text"
+            placeholder="Filtrar por nombre o DNI"
+            [value]="filterTerm"
+            (input)="onFilterInput($any($event.target).value)"
+          />
+          <i class="fi fi-rr-filter" aria-hidden="true"></i>
+        </div>
+
         <div class="follow-up-panel">
           <div class="table-wrap">
             <table aria-label="Tabla de clientes con seguimiento personalizado">
@@ -17,7 +110,12 @@
                 </tr>
               </thead>
               <tbody>
-                @for (client of clients; track client.id) {
+                @if (!isLoading && filteredClients.length === 0) {
+                  <tr>
+                    <td class="no-results" colspan="4">No se encontraron usuarios para la busqueda.</td>
+                  </tr>
+                } @else {
+                @for (client of filteredClients; track client.id) {
                   <tr>
                     <td>{{ client.fullName }}</td>
                     <td>{{ client.dni }}</td>
@@ -57,6 +155,7 @@
                       </button>
                     </td>
                   </tr>
+                }
                 }
               </tbody>
             </table>

@@ -7,20 +7,25 @@
       <article class="members-copy">
         <h1>Membresias</h1>
 
-        <div class="plan-row">
-          <span>Mensual - Pase libre</span>
-          <strong>$55.000</strong>
-        </div>
-
-        <div class="plan-row">
-          <span>Mensual - 3 veces por semana</span>
-          <strong>$50.000</strong>
-        </div>
-
-        <div class="plan-row">
-          <span>Mensual - 2 veces por semana</span>
-          <strong>$40.000</strong>
-        </div>
+        @if (isLoading) {
+          <div class="plan-row plan-row--loading">
+            <span>Cargando membresias disponibles...</span>
+          </div>
+        } @else if (memberships.length === 0) {
+          <div class="plan-row plan-row--loading">
+            <span>No hay membresias disponibles en este momento.</span>
+          </div>
+        } @else {
+          @for (membership of memberships; track membership.id) {
+            <div class="plan-row">
+              <div class="plan-copy">
+                <span>{{ membership.nombre }}</span>
+                <small>{{ membership.dias }} dias{{ membership.tipoMembresia?.nombre ? ' · ' + membership.tipoMembresia?.nombre : '' }}</small>
+              </div>
+              <strong>{{ formatAmount(membership.costo) }}</strong>
+            </div>
+          }
+        }
 
         <p>Seleccioná el que mejor se adapte a vos!</p>
 

@@ -1,7 +1,14 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { finalize } from 'rxjs';
 import { PageHeaderCompactComponent } from '../../shared/page-header-compact/page-header-compact';
 import { PageBgComponent } from '../../shared/page-bg/page-bg';
+import {
+  SeguimientoApiService,
+  SeguimientoTestItem,
+  SeguimientoUnidadMedida,
+} from '../../core/services/seguimiento-api.service';
 
 type MonthlyValue = {
   month: string;
@@ -9,6 +16,7 @@ type MonthlyValue = {
 };
 
 type MetricCard = {
+  id: number;
   key: string;
   title: string;
   unit: string;
@@ -25,84 +33,140 @@ type TrendDot = {
 
 @Component({
   standalone: true,
-  imports: [PageHeaderCompactComponent, PageBgComponent],
+  imports: [PageHeaderCompactComponent, PageBgComponent, FormsModule],
   templateUrl: './seguimiento-detalle.html',
   styleUrl: './seguimiento-detalle.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SeguimientoDetalle {
-  personName = 'Cliente';
-  readonly gridRows = [8, 18, 28, 38, 48, 58];
-  private customMetricCounter = 1;
+export class SeguimientoDetalle implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly seguimientoApiService = inject(SeguimientoApiService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
-  metrics: MetricCard[] = [
-    {
-      key: 'peso',
-      title: 'Evolucion del peso',
-      unit: 'kg',
-      values: [
-        { month: 'Ene', value: 82 },
-        { month: 'Feb', value: 80.8 },
-        { month: 'Mar', value: 79.9 },
-      ],
-    },
-    {
-      key: 'imc',
-      title: 'Evolucion del IMC',
-      unit: '',
-      values: [
-        { month: 'Ene', value: 26.1 },
-        { month: 'Feb', value: 25.6 },
-        { month: 'Mar', value: 25.1 },
-      ],
-    },
-    {
-      key: 'salto',
-      title: 'Altura de salto',
-      unit: 'cm',
-      values: [
-        { month: 'Ene', value: 34 },
-        { month: 'Feb', value: 36 },
-        { month: 'Mar', value: 38 },
-      ],
-    },
-    {
-      key: 'fuerza',
-      title: 'Fuerza tren inferior',
-      unit: 'kg',
-      values: [
-        { month: 'Ene', value: 70 },
-        { month: 'Feb', value: 74 },
-        { month: 'Mar', value: 78 },
-      ],
-    },
-  ];
+  personName = 'Cliente';
+  userId: number | null = null;
+  isLoading = false;
+  isLoadingUnits = false;
+  statusMessage = '';
+  unitOptions: SeguimientoUnidadMedida[] = [];
+  newMetricTitle = '';
+  selectedUnidadMedidaId: number | null = null;
+  readonly gridRows = [8, 18, 28, 38, 48, 58];
+
+  metrics: MetricCard[] = [];
 
   private readonly monthOrder = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-  constructor(private readonly route: ActivatedRoute) {
+  ngOnInit(): void {
+    this.loadUnitOptions();
+
     this.route.queryParamMap.subscribe((params) => {
       const requestedName = params.get('name');
       if (requestedName && requestedName.trim()) {
         this.personName = requestedName.trim();
       }
     });
+
+    this.route.paramMap.subscribe((params) => {
+      const rawId = Number(params.get('id'));
+      this.userId = Number.isFinite(rawId) && rawId > 0 ? rawId : null;
+
+      if (!this.userId) {
+        this.statusMessage = 'No se encontro el usuario para cargar el seguimiento.';
+        this.metrics = [];
+        this.cdr.markForCheck();
+        return;
+      }
+
+      this.loadTests(this.userId);
+    });
+  }
+
+  private loadUnitOptions(): void {
+    this.isLoadingUnits = true;
+    this.cdr.markForCheck();
+
+    this.seguimientoApiService
+      .getUnidadesMedida()
+      .pipe(
+        finalize(() => {
+          this.isLoadingUnits = false;
+          this.cdr.markForCheck();
+        }),
+      )
+      .subscribe({
+        next: (units) => {
+          this.unitOptions = units;
+          this.selectedUnidadMedidaId = units[0]?.id ?? null;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.unitOptions = [];
+          this.selectedUnidadMedidaId = null;
+          this.statusMessage = 'No se pudieron cargar las unidades de medida.';
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  private loadTests(userId: number): void {
+    this.isLoading = true;
+    this.statusMessage = '';
+    this.metrics = [];
+    this.cdr.markForCheck();
+
+    this.seguimientoApiService
+      .getTestsByUserId(userId)
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        }),
+      )
+      .subscribe({
+        next: (tests) => {
+          this.metrics = tests.map((test) => this.mapTestToMetric(test));
+          if (this.metrics.length === 0) {
+            this.statusMessage = 'No hay test asociados al usuario.';
+          }
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.metrics = [];
+          this.statusMessage = 'No se pudieron cargar los tests del usuario.';
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  private mapTestToMetric(test: SeguimientoTestItem): MetricCard {
+    const monthlyValues = Array.isArray(test.valoresMensuales) ? test.valoresMensuales : [];
+    return {
+      id: test.id,
+      key: `test-${test.id}`,
+      title: test.nombre,
+      unit: test.unidad ?? '',
+      values: monthlyValues.map((value) => ({
+        month: value.mes,
+        value: Number(value.valor),
+      })),
+    };
   }
 
   addMonthlyValue(metricKey: string): void {
     const metric = this.metrics.find((item) => item.key === metricKey);
-    if (!metric) {
+    if (!metric || !this.userId) {
       return;
     }
 
-    const lastMonth = metric.values[metric.values.length - 1]?.month;
-    const nextMonth = this.getNextMonth(lastMonth);
+    const currentMonth = this.getCurrentMonth();
     const promptLabel = metric.unit ? `${metric.title} (${metric.unit})` : metric.title;
 
     if (typeof window === 'undefined') {
       return;
     }
 
-    const input = window.prompt(`Agregar valor de ${promptLabel} para ${nextMonth}:`);
+    const input = window.prompt(`Agregar valor de ${promptLabel} para ${currentMonth}:`);
     if (input === null) {
       return;
     }
@@ -117,46 +181,58 @@ export class SeguimientoDetalle {
       return;
     }
 
-    metric.values = [...metric.values, { month: nextMonth, value: Number(numericValue.toFixed(1)) }];
-    this.metrics = [...this.metrics];
+    this.seguimientoApiService
+      .addMonthlyValue(metric.id, {
+        mes: currentMonth,
+        valor: Number(numericValue.toFixed(1)),
+      })
+      .subscribe({
+        next: (updatedTest) => {
+          const updatedMetric = this.mapTestToMetric(updatedTest);
+          this.metrics = this.metrics.map((item) => (item.id === updatedMetric.id ? updatedMetric : item));
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.statusMessage = 'No se pudo guardar el valor mensual.';
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   addCustomMetric(): void {
-    if (typeof window === 'undefined') {
+    if (!this.userId) {
       return;
     }
 
-    const inputTitle = window.prompt('Titulo del nuevo grafico:');
-    if (inputTitle === null) {
-      return;
-    }
-
-    const title = inputTitle.trim();
+    const title = this.newMetricTitle.trim();
     if (!title) {
+      this.statusMessage = 'Debes ingresar un nombre para el test.';
       return;
     }
 
-    const inputUnit = window.prompt('Unidad de medida (ej: kg, mt, gr):');
-    if (inputUnit === null) {
+    if (!this.selectedUnidadMedidaId) {
+      this.statusMessage = 'Debes seleccionar una unidad de medida.';
       return;
     }
 
-    const unit = inputUnit.trim();
-    if (!unit) {
-      return;
-    }
-
-    const normalizedKey = this.normalizeKey(title);
-    const uniqueKey = this.buildUniqueMetricKey(normalizedKey || `custom-${this.customMetricCounter++}`);
-
-    const newMetric: MetricCard = {
-      key: uniqueKey,
-      title,
-      unit,
-      values: [],
-    };
-
-    this.metrics = [...this.metrics, newMetric];
+    this.seguimientoApiService
+      .createTestForUser(this.userId, {
+        nombre: title,
+        unidadMedidaId: this.selectedUnidadMedidaId,
+      })
+      .subscribe({
+        next: (test) => {
+          const newMetric = this.mapTestToMetric(test);
+          this.metrics = [...this.metrics, newMetric];
+          this.newMetricTitle = '';
+          this.statusMessage = '';
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.statusMessage = 'No se pudo crear el nuevo test.';
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   getGridColumns(totalPoints: number): number[] {
@@ -211,36 +287,7 @@ export class SeguimientoDetalle {
     return chartBottom - normalized * (chartBottom - chartTop);
   }
 
-  private getNextMonth(lastMonth: string | undefined): string {
-    if (!lastMonth) {
-      return this.monthOrder[0];
-    }
-
-    const currentIndex = this.monthOrder.indexOf(lastMonth);
-    if (currentIndex < 0) {
-      return this.monthOrder[0];
-    }
-
-    return this.monthOrder[(currentIndex + 1) % this.monthOrder.length];
-  }
-
-  private normalizeKey(value: string): string {
-    return value
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  }
-
-  private buildUniqueMetricKey(baseKey: string): string {
-    let candidate = baseKey;
-    let suffix = 1;
-
-    while (this.metrics.some((metric) => metric.key === candidate)) {
-      candidate = `${baseKey}-${suffix++}`;
-    }
-
-    return candidate;
+  private getCurrentMonth(): string {
+    return this.monthOrder[new Date().getMonth()];
   }
 }

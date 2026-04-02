@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { Test } from './test.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 
@@ -10,9 +10,10 @@ export class Seguimiento {
     @Column()
     estado: boolean;
 
-    @OneToMany(() => Test, (test) => test.id)
+    @OneToMany(() => Test, (test) => test.seguimiento)
     test: Test[];
 
-    @ManyToOne(() => User, (user) => user.id)
-     user: User;
+    @ManyToOne(() => User, (user) => user.seguimiento)
+    @JoinColumn({ name: 'user_id' })
+    user: User;
 }

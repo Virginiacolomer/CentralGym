@@ -10,15 +10,44 @@
             <span
               class="status-dot"
               [class.status-dot-up-to-date]="currentStatus === 'upToDate'"
-              [class.status-dot-due-soon]="currentStatus === 'dueSoon'"
-              [class.status-dot-overdue]="currentStatus === 'overdue'"
+              [class.status-dot-overdue]="currentStatus === 'pending'"
               aria-hidden="true"
             ></span>
             <span class="status-label">{{ status.label }}</span>
           </div>
 
-          <p class="status-detail">{{ status.detail }}</p>
-          <p class="next-payment">Proximo pago: <strong>{{ status.nextPayment }}</strong></p>
+          <p class="status-detail">{{ statusDetail }}</p>
+          <p class="next-payment">Proximo pago: <strong>{{ nextPaymentLabel }}</strong></p>
+        </section>
+
+        <section class="current-payments-panel" aria-label="Pagos del mes actual">
+          <div class="current-payments-header">
+            <h2>Pagos de {{ currentMonthLabel }}</h2>
+            <span class="payments-count">{{ currentMonthPayments.length }} registrados</span>
+          </div>
+
+          @if (paymentsLoadError) {
+            <p class="current-payments-error">{{ paymentsLoadError }}</p>
+          } @else if (currentMonthPayments.length > 0) {
+            <div class="current-payments-list">
+              @for (payment of currentMonthPayments; track payment.id) {
+                <article class="payment-card">
+                  <div>
+                    <p class="payment-month">{{ payment.monthLabel }}</p>
+                    <h3>{{ payment.membershipName }}</h3>
+                    @if (payment.membershipType) {
+                      <p class="payment-type">{{ payment.membershipType }}</p>
+                    }
+                    <p class="payment-date">Cobrado el {{ payment.createdAtLabel }}</p>
+                  </div>
+
+                  <strong class="payment-amount">{{ payment.amountLabel }}</strong>
+                </article>
+              }
+            </div>
+          } @else {
+            <p class="current-payments-empty">No hay pagos registrados para {{ currentMonthLabel }}.</p>
+          }
         </section>
 
         <a class="history-link" routerLink="/historial-de-pagos">Historial de pagos</a>

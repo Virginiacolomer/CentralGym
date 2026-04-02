@@ -10,7 +10,6 @@ import { AltaUsuarios } from './pages/alta-usuarios/alta-usuarios';
 import { GestionMembresias } from './pages/gestion-membresias/gestion-membresias';
 import { AsignarPlan } from './pages/asignar-plan/asignar-plan';
 import { CrearPlan } from './pages/crear-plan/crear-plan';
-import { CambiarMembresia } from './pages/cambiar-membresia/cambiar-membresia';
 import { EditarPlan } from './pages/editar-plan/editar-plan';
 import { VerPlan } from './pages/ver-plan/ver-plan';
 import { MiPlan } from './pages/mi-plan/mi-plan';
@@ -20,31 +19,38 @@ import { HistorialDePagos } from './pages/historial-de-pagos/historial-de-pagos'
 import { SeguimientoPersonalizado } from './pages/seguimiento-personalizado/seguimiento-personalizado';
 import { SeguimientoDetalle } from './pages/seguimiento-detalle/seguimiento-detalle';
 import { SeguimientoCliente } from './pages/seguimiento-cliente/seguimiento-cliente';
+import { authGuard } from './core/guards/auth.guard';
+import { publicGuard } from './core/guards/public.guard';
+
 // Configuracion de rutas de toda la aplicacion.
 export const routes: Routes = [
-	// Ruta raiz: cuando entras a / muestra la pagina de inicio.
-	{ path: '', component: PaginaInicio },
-	{ path: 'inicio', component: PaginaInicio },
-    { path: 'membresias', component: Membresias },
-	{ path: 'login', component: Login },
-	{ path: 'register', component: Register },
-	{ path: 'menu-admin', component: MenuAdmin },
-	{ path: 'menu-cliente', component: MenuCliente },
-	{ path: 'gestion-usuarios', component: GestionUsuarios },
-	{ path: 'alta-usuarios', component: AltaUsuarios },
-	{ path: 'gestion-membresias', component: GestionMembresias },
-	{ path: 'asignar-plan', component: AsignarPlan },
-	{ path: 'crear-plan', component: CrearPlan },
-	{ path: 'cambiar-membresia', component: CambiarMembresia },
-	{ path: 'editar-plan', component: EditarPlan },
-	{ path: 'ver-plan', component: VerPlan },
-	{ path: 'mi-plan', component: MiPlan },
-	{ path: 'mi-membresia', component: MiMembresia },
-	{ path: 'mis-pagos', component: MisPagos },
-	{ path: 'historial-de-pagos', component: HistorialDePagos },
-	{ path: 'seguimiento-personalizado', component: SeguimientoPersonalizado },
-	{ path: 'seguimiento-personalizado/:id', component: SeguimientoDetalle },
-	{ path: 'seguimiento-cliente', component: SeguimientoCliente },
+	// Rutas publicas: al acceder, si el usuario estaba logueado se cierra su sesion automaticamente.
+	{ path: '', component: PaginaInicio, canActivate: [publicGuard] },
+	{ path: 'inicio', component: PaginaInicio, canActivate: [publicGuard] },
+	{ path: 'membresias', component: Membresias, canActivate: [publicGuard] },
+	{ path: 'login', component: Login, canActivate: [publicGuard] },
+	{ path: 'register', component: Register, canActivate: [publicGuard] },
+
+	// Rutas exclusivas para ADMIN.
+	{ path: 'menu-admin', component: MenuAdmin, canActivate: [authGuard], data: { role: 'ADMIN' } },
+	{ path: 'gestion-usuarios', component: GestionUsuarios, canActivate: [authGuard], data: { role: 'ADMIN' } },
+	{ path: 'alta-usuarios', component: AltaUsuarios, canActivate: [authGuard], data: { role: 'ADMIN' } },
+	{ path: 'gestion-membresias', component: GestionMembresias, canActivate: [authGuard], data: { role: 'ADMIN' } },
+	{ path: 'asignar-plan', component: AsignarPlan, canActivate: [authGuard], data: { role: 'ADMIN' } },
+	{ path: 'crear-plan', component: CrearPlan, canActivate: [authGuard], data: { role: 'ADMIN' } },
+	{ path: 'editar-plan', component: EditarPlan, canActivate: [authGuard], data: { role: 'ADMIN' } },
+	{ path: 'ver-plan', component: VerPlan, canActivate: [authGuard], data: { role: 'ADMIN' } },
+	{ path: 'historial-de-pagos', component: HistorialDePagos, canActivate: [authGuard] },
+	{ path: 'seguimiento-personalizado', component: SeguimientoPersonalizado, canActivate: [authGuard], data: { role: 'ADMIN' } },
+	{ path: 'seguimiento-personalizado/:id', component: SeguimientoDetalle, canActivate: [authGuard], data: { role: 'ADMIN' } },
+
+	// Rutas exclusivas para CLIENTE.
+	{ path: 'menu-cliente', component: MenuCliente, canActivate: [authGuard], data: { role: 'CLIENTE' } },
+	{ path: 'mi-plan', component: MiPlan, canActivate: [authGuard], data: { role: 'CLIENTE' } },
+	{ path: 'mi-membresia', component: MiMembresia, canActivate: [authGuard], data: { role: 'CLIENTE' } },
+	{ path: 'mis-pagos', component: MisPagos, canActivate: [authGuard], data: { role: 'CLIENTE' } },
+	{ path: 'seguimiento-cliente', component: SeguimientoCliente, canActivate: [authGuard], data: { role: 'CLIENTE' } },
+
 	// Comodin: cualquier URL no existente redirige al home.
 	{ path: '**', redirectTo: '' },
 ];

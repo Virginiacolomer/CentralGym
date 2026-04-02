@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { PageHeaderCompactComponent } from '../../shared/page-header-compact/page-header-compact';
 import { PageBgComponent } from '../../shared/page-bg/page-bg';
-
-type MembershipType = '3xsemana' | '2xsemana' | 'pase libre';
-type PaymentState = 'alDia' | 'cuotaPendiente';
+import { ActiveClientUserItem, PaymentState, UserMembershipSummary, UsersApiService } from '../../core/services/users-api.service';
+import { Membresia, MembresiaApiService } from '../../core/services/membresia-api.service';
 
 type ManagedUser = {
   id: number;
@@ -11,53 +12,38 @@ type ManagedUser = {
   lastName: string;
   dni: string;
   paymentState: PaymentState;
-  membership: MembershipType;
+  membershipId: number | null;
+  membership: string;
+  memberships: UserMembershipSummary[];
   editMembershipOpen: boolean;
-  pendingMembership: MembershipType;
+  pendingMembershipId: number | null;
 };
 
 @Component({
   
   standalone: true,
-  imports: [PageHeaderCompactComponent, PageBgComponent],
+  imports: [PageHeaderCompactComponent, PageBgComponent, FormsModule],
   templateUrl: './gestion-usuarios.html',
   styleUrl: './gestion-usuarios.css',
 })
-export class GestionUsuarios {
+export class GestionUsuarios implements OnInit {
+  private readonly usersApiService = inject(UsersApiService);
+  private readonly membresiaApiService = inject(MembresiaApiService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly seguimientoMembershipTypeId = 2;
+  private readonly entrenamientoMembershipTypeId = 1;
+
   filterTerm = '';
+  isLoading = false;
+  statusMessage = '';
 
-  readonly membershipOptions: MembershipType[] = ['3xsemana', '2xsemana', 'pase libre'];
+  users: ManagedUser[] = [];
+  memberships: Membresia[] = [];
 
-  users: ManagedUser[] = [
-    this.createUser(1, 'Maria Virginia', 'Colomer Prevotel', '45700085', 'alDia', '3xsemana'),
-    this.createUser(2, 'Juan Pablo', 'Lopez', '12345689', 'cuotaPendiente', '2xsemana'),
-    this.createUser(3, 'Sandra', 'Herrera', '98564785', 'alDia', 'pase libre'),
-    this.createUser(4, 'Pedro', 'Gutierrez', '64523154', 'cuotaPendiente', '3xsemana'),
-    this.createUser(5, 'Lautaro', 'Gimenez', '40123789', 'alDia', '2xsemana'),
-    this.createUser(6, 'Camila', 'Roldan', '39222881', 'cuotaPendiente', '3xsemana'),
-    this.createUser(7, 'Micaela', 'Ferreyra', '41336210', 'alDia', 'pase libre'),
-    this.createUser(8, 'Andres', 'Vera', '36774001', 'cuotaPendiente', '2xsemana'),
-    this.createUser(9, 'Luciana', 'Correa', '42876093', 'alDia', '3xsemana'),
-    this.createUser(10, 'Nicolas', 'Arce', '37650444', 'alDia', '2xsemana'),
-    this.createUser(11, 'Rocio', 'Montes', '42999003', 'cuotaPendiente', 'pase libre'),
-    this.createUser(12, 'Sofia', 'Leguizamon', '44122877', 'alDia', '3xsemana'),
-    this.createUser(13, 'Thiago', 'Molina', '45890812', 'cuotaPendiente', '2xsemana'),
-    this.createUser(14, 'Aylin', 'Sosa', '44777120', 'alDia', 'pase libre'),
-    this.createUser(15, 'Agustin', 'Palacios', '38990345', 'cuotaPendiente', '3xsemana'),
-    this.createUser(16, 'Valentina', 'Caceres', '43678111', 'alDia', '2xsemana'),
-    this.createUser(17, 'Bruno', 'Ramos', '40228974', 'alDia', '3xsemana'),
-    this.createUser(18, 'Milagros', 'Bustamante', '44989002', 'cuotaPendiente', 'pase libre'),
-    this.createUser(19, 'Renzo', 'Cruz', '39557100', 'alDia', '2xsemana'),
-    this.createUser(20, 'Karen', 'Diaz', '41773492', 'cuotaPendiente', '3xsemana'),
-    this.createUser(21, 'Ezequiel', 'Pereyra', '38651002', 'alDia', '2xsemana'),
-    this.createUser(22, 'Julieta', 'Dominguez', '43219870', 'alDia', 'pase libre'),
-    this.createUser(23, 'Franco', 'Silva', '40444971', 'cuotaPendiente', '3xsemana'),
-    this.createUser(24, 'Noelia', 'Mendez', '42331145', 'alDia', '2xsemana'),
-    this.createUser(25, 'Gonzalo', 'Castro', '39128831', 'cuotaPendiente', 'pase libre'),
-    this.createUser(26, 'Carolina', 'Campos', '44667213', 'alDia', '3xsemana'),
-    this.createUser(27, 'Mateo', 'Ruiz', '43888231', 'alDia', '2xsemana'),
-    this.createUser(28, 'Bianca', 'Acosta', '45111701', 'cuotaPendiente', '3xsemana'),
-  ];
+  ngOnInit(): void {
+    this.loadMemberships();
+    this.loadUsers();
+  }
 
   onFilterInput(value: string): void {
     this.filterTerm = value;
@@ -81,62 +67,6 @@ export class GestionUsuarios {
     });
   }
 
-  makeStatusUpToDate(userId: number): void {
-    this.users = this.users.map((user) =>
-      user.id === userId
-        ? {
-            ...user,
-            paymentState: 'alDia',
-          }
-        : user
-    );
-  }
-
-  toggleMembershipEditor(userId: number): void {
-    this.users = this.users.map((user) => {
-      if (user.id !== userId) {
-        return {
-          ...user,
-          editMembershipOpen: false,
-          pendingMembership: user.membership,
-        };
-      }
-
-      return {
-        ...user,
-        editMembershipOpen: !user.editMembershipOpen,
-        pendingMembership: user.membership,
-      };
-    });
-  }
-
-  getAlternativeMemberships(user: ManagedUser): MembershipType[] {
-    return this.membershipOptions.filter((option) => option !== user.membership);
-  }
-
-  setPendingMembership(userId: number, newMembership: MembershipType): void {
-    this.users = this.users.map((user) =>
-      user.id === userId
-        ? {
-            ...user,
-            pendingMembership: newMembership,
-          }
-        : user
-    );
-  }
-
-  applyMembershipChange(userId: number): void {
-    this.users = this.users.map((user) =>
-      user.id === userId
-        ? {
-            ...user,
-            membership: user.pendingMembership,
-            editMembershipOpen: false,
-          }
-        : user
-    );
-  }
-
   getStatusLabel(status: PaymentState): string {
     if (status === 'alDia') {
       return 'Al dia';
@@ -145,23 +75,162 @@ export class GestionUsuarios {
     return 'Cuota pendiente';
   }
 
-  private createUser(
-    id: number,
-    firstName: string,
-    lastName: string,
-    dni: string,
-    paymentState: PaymentState,
-    membership: MembershipType
-  ): ManagedUser {
+  toggleMembershipEditor(userId: number, currentMembershipId: number | null): void {
+    this.users = this.users.map((user) => {
+      if (user.id !== userId) {
+        return {
+          ...user,
+          editMembershipOpen: false,
+        };
+      }
+
+      const isOpening = !user.editMembershipOpen;
+
+      return {
+        ...user,
+        editMembershipOpen: isOpening,
+        pendingMembershipId: isOpening ? currentMembershipId : user.pendingMembershipId,
+      };
+    });
+    this.cdr.detectChanges();
+  }
+
+  getAlternativeMemberships(user: ManagedUser): Membresia[] {
+    return this.memberships.filter(
+      (membership) => membership.id !== user.membershipId && membership.tipoMembresia?.id === 1,
+    );
+  }
+
+  setPendingMembership(userId: number, membresiaId: number | null): void {
+    this.users = this.users.map((user) =>
+      user.id === userId
+        ? {
+            ...user,
+            pendingMembershipId: membresiaId,
+          }
+        : user
+    );
+    this.cdr.detectChanges();
+  }
+
+  removeSeguimientoMembership(userId: number, membresiaId: number): void {
+    this.usersApiService.removeUserMembership(userId, membresiaId).subscribe({
+      next: () => {
+        this.loadUsers();
+      },
+      error: () => {
+        window.alert('No se pudo eliminar la membresia de seguimiento personalizado.');
+      },
+    });
+  }
+
+  isSeguimientoMembership(membership: UserMembershipSummary): boolean {
+    return membership.tipoMembresiaId === this.seguimientoMembershipTypeId;
+  }
+
+  applyMembershipChange(userId: number): void {
+    const user = this.users.find((item) => item.id === userId);
+    if (!user) {
+      return;
+    }
+
+    const selectedMembershipId = user.pendingMembershipId;
+
+    if (selectedMembershipId === null) {
+      window.alert('Debes seleccionar una membresia antes de guardar.');
+      return;
+    }
+
+    if (!Number.isInteger(selectedMembershipId) || selectedMembershipId <= 0) {
+      window.alert('Debes seleccionar una membresia antes de guardar.');
+      return;
+    }
+
+    this.usersApiService.updateUserMembership(userId, selectedMembershipId).subscribe({
+      next: () => {
+        this.loadUsers();
+      },
+      error: (error) => {
+        console.error('[GestionUsuarios] Error al actualizar membresia', { userId, pendingMembershipId: selectedMembershipId, error });
+        window.alert('No se pudo actualizar la membresia del usuario.');
+      },
+    });
+  }
+
+  makeStatusUpToDate(userId: number): void {
+    const user = this.users.find((item) => item.id === userId);
+    if (!user?.membershipId) {
+      window.alert('El usuario no tiene membresia asignada.');
+      return;
+    }
+
+    this.usersApiService.markUserPaymentUpToDate(userId, user.membershipId).subscribe({
+      next: () => {
+        this.loadUsers();
+      },
+      error: () => {
+        window.alert('No se pudo actualizar el estado de pago del usuario.');
+      },
+    });
+  }
+
+  private loadMemberships(): void {
+    this.membresiaApiService.getAllMemberships().subscribe({
+      next: (memberships) => {
+        this.memberships = memberships;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.memberships = [];
+      },
+    });
+  }
+
+  private loadUsers(): void {
+    this.isLoading = true;
+    this.statusMessage = '';
+    this.cdr.markForCheck();
+
+    this.usersApiService
+      .getClientesActivos()
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (users) => {
+          this.users = users.map((user) => this.mapActiveClientToManagedUser(user));
+          if (this.users.length === 0) {
+            this.statusMessage = 'No hay usuarios para mostrar.';
+          }
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.statusMessage = 'No se pudieron cargar los usuarios.';
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  private mapActiveClientToManagedUser(user: ActiveClientUserItem): ManagedUser {
+    const memberships = (user.membresias ?? []).filter(
+      (membership) => membership.tipoMembresiaId === this.entrenamientoMembershipTypeId,
+    );
+    const entrenamientoMembership = memberships[0];
+
     return {
-      id,
-      firstName,
-      lastName,
-      dni,
-      paymentState,
-      membership,
+      id: user.id,
+      firstName: user.nombre,
+      lastName: user.apellido,
+      dni: user.dni,
+      paymentState: entrenamientoMembership?.estadoPago ?? 'cuotaPendiente',
+      membershipId: entrenamientoMembership?.membresiaId ?? null,
+      membership: entrenamientoMembership?.nombre ?? 'Sin membresia de entrenamiento',
+      memberships,
       editMembershipOpen: false,
-      pendingMembership: membership,
+      pendingMembershipId: entrenamientoMembership?.membresiaId ?? null,
     };
   }
 

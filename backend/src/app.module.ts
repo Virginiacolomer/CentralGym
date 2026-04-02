@@ -20,7 +20,7 @@ import { AppController } from './app.controller';
         type: 'postgres',
         url: configService.get<string>('DATABASE_URL'),
         autoLoadEntities: true,
-        synchronize: false, // solo dev
+        synchronize: true, // solo dev
         ssl: { rejectUnauthorized: false },
       }),
       inject: [ConfigService],

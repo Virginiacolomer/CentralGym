@@ -5,6 +5,14 @@
       <div class="detail-shell">
         <h1>Seguimiento {{ personName }}</h1>
 
+        @if (isLoading) {
+          <p class="status-note">Cargando tests...</p>
+        }
+
+        @if (!isLoading && statusMessage) {
+          <p class="status-note">{{ statusMessage }}</p>
+        }
+
         <div class="metrics-grid">
           @for (metric of metrics; track metric.key) {
             <article class="metric-card">
@@ -49,15 +57,34 @@
         </div>
 
         <div class="add-chart-wrap">
-          <button
-            type="button"
-            class="add-chart-btn"
-            aria-label="Agregar nuevo grafico"
-            title="Agregar nuevo grafico"
-            (click)="addCustomMetric()"
-          >
-            +
-          </button>
+          <div class="add-chart-controls">
+            <input
+              type="text"
+              [(ngModel)]="newMetricTitle"
+              placeholder="Nombre del test"
+              [disabled]="isLoadingUnits"
+            />
+
+            <select
+              [(ngModel)]="selectedUnidadMedidaId"
+              [disabled]="isLoadingUnits || unitOptions.length === 0"
+            >
+              @for (unit of unitOptions; track unit.id) {
+                <option [ngValue]="unit.id">{{ unit.nombre }}</option>
+              }
+            </select>
+
+            <button
+              type="button"
+              class="add-chart-btn"
+              aria-label="Agregar nuevo grafico"
+              title="Agregar nuevo grafico"
+              (click)="addCustomMetric()"
+              [disabled]="isLoadingUnits"
+            >
+              +
+            </button>
+          </div>
         </div>
       </div>
     </section>

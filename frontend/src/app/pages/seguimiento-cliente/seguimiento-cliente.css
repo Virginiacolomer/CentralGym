@@ -29,6 +29,13 @@
   color: #39f45a;
 }
 
+.status-note {
+  margin: 0 0 0.85rem;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.95rem;
+  color: #d6dde3;
+}
+
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

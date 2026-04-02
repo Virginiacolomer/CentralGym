@@ -1,20 +1,23 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToOne, OneToMany} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, Index, JoinColumn } from 'typeorm';
 import { PlanEntrenamiento } from './plan-entrenamiento.entity';
-import { GrupoMuscular } from './grupoMuscular.entity';
-import { EjercicioDia } from './ejercicioDia.entity';
 
-@Entity({ name: 'dia', schema: 'public' })
+@Entity({ name: 'plan_dia', schema: 'public' })
+@Index('uq_plan_dia_numero', ['planEntrenamiento', 'numeroDia'], { unique: true })
 export class Dia {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({ type: 'bigint' })
     id: number;
 
-    @ManyToOne(() => PlanEntrenamiento, (planEntrenamiento) => planEntrenamiento.dias)
+    @Column({ name: 'planEntrenamientoId', type: 'bigint' })
+    planEntrenamientoId: number;
+
+    @ManyToOne(() => PlanEntrenamiento)
+    @JoinColumn({ name: 'planEntrenamientoId' })
     planEntrenamiento: PlanEntrenamiento;
 
-    @ManyToOne(() => GrupoMuscular, (grupoMuscular) => grupoMuscular.dias)
-    grupoMuscular: GrupoMuscular;
+    @Column({ name: 'numero_dia', type: 'smallint' })
+    numeroDia: number;
 
-    @OneToMany(() => EjercicioDia, (ejercicioDia) => ejercicioDia.dia)
-    ejerciciosDia: EjercicioDia[];
+    @Column({ nullable: true, length: 80 })
+    nombre?: string;
 
 }
