@@ -1,10 +1,11 @@
-import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from '../users/entities/user.entity';
+import { UserStatus } from '../users/enums/user-status.enum';
 import { LoginDto } from './dto/login.dto';
 
 @Injectable()
@@ -34,6 +35,10 @@ export class AuthService {
 
     if (!passwordValid) {
       throw new UnauthorizedException('La contrasena es incorrecta.');
+    }
+
+    if (user.estado !== UserStatus.ACTIVO) {
+      throw new ForbiddenException('Espera que tu entrenador habilite tu cuenta!');
     }
 
     // RESPUESTA: Devolver usuario SIN password_hash
