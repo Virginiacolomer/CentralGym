@@ -20,7 +20,12 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "load:test": "node scripts/load-test.mjs",
+    "load:test:health": "node scripts/load-test.mjs health",
+    "load:test:root": "node scripts/load-test.mjs root",
+    "load:test:login": "node scripts/load-test.mjs login",
+    "load:test:all": "node scripts/load-test.mjs all"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

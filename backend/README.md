@@ -73,6 +73,47 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Load testing rapido
+
+Puedes simular muchas peticiones para medir si el deploy aguanta o se vuelve lento.
+
+Variables opcionales:
+
+- `API_URL` (default: `http://localhost:3000`)
+- `LOAD_CONCURRENCY` (default: `50`)
+- `LOAD_DURATION_SEC` (default: `30`)
+- `LOAD_TIMEOUT_MS` (default: `10000`)
+- `LOAD_LOGIN_EMAIL` y `LOAD_LOGIN_PASSWORD` para escenario de login
+
+Comandos:
+
+```bash
+# Smoke test contra /health
+npm run load:test:health
+
+# Escenario contra /
+npm run load:test:root
+
+# Escenario contra /auth/login
+npm run load:test:login
+
+# Ejecuta health + root + login de forma secuencial
+npm run load:test:all
+```
+
+Ejemplo contra deploy en Railway (PowerShell):
+
+```powershell
+$env:API_URL="https://tu-api.railway.app"
+$env:LOAD_CONCURRENCY="120"
+$env:LOAD_DURATION_SEC="45"
+$env:LOAD_LOGIN_EMAIL="admin@tu-dominio.com"
+$env:LOAD_LOGIN_PASSWORD="tu-password"
+npm run load:test:all
+```
+
+El script imprime `RPS`, latencia promedio/p50/p95/p99 y conteo de errores HTTP/red.
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.

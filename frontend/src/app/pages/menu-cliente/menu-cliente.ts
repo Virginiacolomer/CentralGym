@@ -18,9 +18,9 @@ export class MenuCliente {
   onSeguimientoClick(event: MouseEvent): void {
     event.preventDefault();
 
-    this.membresiaApiService.getMyMembership().subscribe({
-      next: (membership) => {
-        if (this.hasSeguimientoMembership(membership)) {
+    this.membresiaApiService.getMyMemberships().subscribe({
+      next: (memberships) => {
+        if (this.hasPaidSeguimientoMembership(memberships)) {
           this.router.navigate(['/seguimiento-cliente']);
           return;
         }
@@ -33,15 +33,15 @@ export class MenuCliente {
     });
   }
 
-  private hasSeguimientoMembership(membership: UserMembresiaResponse | null): boolean {
-    if (!membership?.membresia) {
-      return false;
-    }
+  private hasPaidSeguimientoMembership(memberships: UserMembresiaResponse[]): boolean {
+    return memberships.some((membership) => {
+      const tipo = (membership.membresia?.tipoMembresia?.nombre ?? '').toLowerCase();
+      const nombreMembresia = (membership.membresia?.nombre ?? '').toLowerCase();
+      const hasSeguimiento = tipo.includes('seguimiento') || nombreMembresia.includes('seguimiento');
+      const estado = String(membership.estado?.nombre ?? '').toUpperCase();
 
-    const tipo = (membership.membresia.tipoMembresia?.nombre ?? '').toLowerCase();
-    const nombreMembresia = (membership.membresia.nombre ?? '').toLowerCase();
-
-    return tipo.includes('seguimiento') || nombreMembresia.includes('seguimiento');
+      return hasSeguimiento && estado === 'AL_DIA';
+    });
   }
 }
 
