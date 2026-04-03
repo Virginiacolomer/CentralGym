@@ -30,6 +30,11 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
         authStateService.logout();
         router.navigate(['/login']);
       } else if (error?.status === 403) {
+        if (isLoginRequest) {
+          // En login dejamos que el componente muestre el mensaje especifico del backend.
+          return throwError(() => error);
+        }
+
         window.alert('Advertencia: tu rol no tiene permiso para realizar esta accion.');
 
         const role = authStateService.getCurrentUser()?.role;
