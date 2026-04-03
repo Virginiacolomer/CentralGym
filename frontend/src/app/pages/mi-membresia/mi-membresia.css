@@ -2,6 +2,9 @@
 
 :host {
 	display: block;
+	width: 100%;
+	max-width: 100%;
+	overflow-x: hidden;
 	--mint-100: #d9ffe4;
 	--mint-300: #8df4aa;
 	--mint-500: #48df74;
@@ -11,18 +14,29 @@
 	--panel-border: rgba(255, 255, 255, 0.14);
 }
 
+:host *,
+:host *::before,
+:host *::after {
+	box-sizing: border-box;
+}
+
 .page-with-compact-header {
 	min-height: 100svh;
+	width: 100%;
+	max-width: 100%;
 }
 
 .page-body {
 	display: flex;
 	justify-content: center;
+	width: 100%;
+	max-width: 100%;
 	padding: 1rem max(1.25rem, env(safe-area-inset-right)) calc(3rem + env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
 }
 
 .content-shell {
 	width: min(100%, 680px);
+	max-width: 100%;
 	min-height: calc(100svh - 8rem);
 	padding-top: clamp(0.8rem, 4vw, 1.6rem);
 	display: flex;
@@ -67,6 +81,7 @@
 
 .panel {
 	position: relative;
+	width: 100%;
 	border-radius: 24px;
 	padding: clamp(1rem, 2.8vw, 1.6rem);
 	border: 1px solid var(--panel-border);
@@ -203,6 +218,7 @@
 .membership-option {
 	display: flex;
 	flex-direction: column;
+	width: 100%;
 	align-items: flex-start;
 	justify-content: flex-start;
 	gap: 0.45rem;
