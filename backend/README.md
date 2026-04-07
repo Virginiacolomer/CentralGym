@@ -79,6 +79,9 @@ Puedes simular muchas peticiones para medir si el deploy aguanta o se vuelve len
 
 Variables opcionales:
 
+- El script intenta leer automaticamente `backend/.env` (si existe).
+- Las variables definidas en la terminal tienen prioridad sobre `.env`.
+
 - `API_URL` (default: `http://localhost:3000`)
 - `LOAD_CONCURRENCY` (default: `50`)
 - `LOAD_DURATION_SEC` (default: `30`)

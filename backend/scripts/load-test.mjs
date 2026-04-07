@@ -1,5 +1,51 @@
 #!/usr/bin/env node
 
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+function loadEnvFile() {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const envPath = path.resolve(__dirname, '../.env');
+
+  if (!fs.existsSync(envPath)) {
+    return;
+  }
+
+  const raw = fs.readFileSync(envPath, 'utf8');
+  const lines = raw.split(/\r?\n/);
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    if (!trimmed || trimmed.startsWith('#')) {
+      continue;
+    }
+
+    const separatorIndex = trimmed.indexOf('=');
+    if (separatorIndex === -1) {
+      continue;
+    }
+
+    const key = trimmed.slice(0, separatorIndex).trim();
+    let value = trimmed.slice(separatorIndex + 1).trim();
+
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+
+    if (key && process.env[key] === undefined) {
+      process.env[key] = value;
+    }
+  }
+}
+
+loadEnvFile();
+
 const SCENARIOS = {
   health: {
     method: 'GET',
@@ -19,7 +65,7 @@ const SCENARIOS = {
   },
 };
 
-const API_URL = (process.env.API_URL || 'http://localhost:3000').replace(/\/$/, '');
+const API_URL = (process.env.API_URL || process.env.api_url || 'http://localhost:3000').replace(/\/$/, '');
 const CONCURRENCY = Number.parseInt(process.env.LOAD_CONCURRENCY || '50', 10);
 const DURATION_SEC = Number.parseInt(process.env.LOAD_DURATION_SEC || '30', 10);
 const TIMEOUT_MS = Number.parseInt(process.env.LOAD_TIMEOUT_MS || '10000', 10);
@@ -44,6 +90,32 @@ function percentile(sorted, p) {
   if (sorted.length === 0) return 0;
   const index = Math.ceil((p / 100) * sorted.length) - 1;
   return sorted[Math.max(0, Math.min(sorted.length - 1, index))];
+}
+
+async function extractHttpErrorSample(response) {
+  const contentType = response.headers.get('content-type') || '';
+
+  try {
+    if (contentType.includes('application/json')) {
+      const payload = await response.json();
+      const message = Array.isArray(payload?.message)
+        ? payload.message.join(' | ')
+        : payload?.message;
+
+      if (typeof message === 'string' && message.trim()) {
+        return `status ${response.status}: ${message}`;
+      }
+    }
+
+    const text = await response.text();
+    if (text && text.trim()) {
+      return `status ${response.status}: ${text.slice(0, 120)}`;
+    }
+  } catch {
+    // If body cannot be parsed, fallback to status only.
+  }
+
+  return `status ${response.status}`;
 }
 
 function printSummary(name, cfg, stats, elapsedMs) {
@@ -132,7 +204,7 @@ async function runScenario(name) {
         } else {
           stats.httpErrors += 1;
           if (stats.sampleHttpErrors.length < 5) {
-            stats.sampleHttpErrors.push(`status ${response.status}`);
+            stats.sampleHttpErrors.push(await extractHttpErrorSample(response));
           }
         }
       } catch (err) {
