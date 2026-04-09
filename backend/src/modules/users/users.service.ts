@@ -10,7 +10,6 @@ import { UserMembresia } from '../membresia/entities/userMembresia.entity';
 import { EstadoUserMembresia } from '../membresia/entities/estadoUserMembresia.entity';
 import { Membresia } from '../membresia/entities/membresia.entity';
 import { Pago } from '../membresia/entities/pago.entity';
-import { Seguimiento } from '../seguimiento/entities/seguimiento.entity';
 
 @Injectable()
 export class UsersService {
@@ -26,8 +25,6 @@ export class UsersService {
     private readonly membresiaRepository: Repository<Membresia>,
     @InjectRepository(Pago)
     private readonly pagoRepository: Repository<Pago>,
-    @InjectRepository(Seguimiento)
-    private readonly seguimientoRepository: Repository<Seguimiento>,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -63,7 +60,7 @@ export class UsersService {
       password_hash: hashedPassword, // Guardamos el HASH
       role: UserRole.CLIENTE,
       estado: UserStatus.CREADO,
-      // seguimiento, membresias, planEntrenamiento se inicializan null/vacío automáticamente
+      // membresias y planEntrenamiento se inicializan null/vacío automáticamente
     });
 
     //GUARDAR EN BASE DE DATOS
@@ -296,7 +293,7 @@ export class UsersService {
     }
 
     if (membresia.tipoMembresia.id !== 1 && membresia.tipoMembresia.id !== 2) {
-      throw new BadRequestException('Solo se puede actualizar membresias de tipo entrenamiento (1) o seguimiento (2).');
+      throw new BadRequestException('Solo se puede actualizar membresias de tipo entrenamiento (1) o complementaria (2).');
     }
 
     const estadoPendiente = await this.estadoUserMembresiaRepository.findOne({
@@ -307,51 +304,37 @@ export class UsersService {
       throw new NotFoundException('Estado PENDIENTE_PAGO no encontrado');
     }
 
-    // SEGUIMIENTO (2): al agregar usuario se crea (o reactiva) una relacion en user_membresia
+    // MEMBRESIA COMPLEMENTARIA (2): al agregar usuario se crea (o reactiva) una relacion en user_membresia
     // sin sobrescribir la membresia de entrenamiento.
     if (membresia.tipoMembresia.id === 2) {
-      const existingSeguimientoMembership = await this.userMembresiaRepository.findOne({
+      const existingSecondaryMembership = await this.userMembresiaRepository.findOne({
         where: { userId, membresiaId },
         relations: ['membresia', 'estado'],
       });
 
-      if (existingSeguimientoMembership) {
-        existingSeguimientoMembership.estadoId = estadoPendiente.id;
-        existingSeguimientoMembership.membresia = membresia;
+      if (existingSecondaryMembership) {
+        existingSecondaryMembership.estadoId = estadoPendiente.id;
+        existingSecondaryMembership.membresia = membresia;
 
-        const updatedSeguimientoMembership = await this.userMembresiaRepository.save(existingSeguimientoMembership);
+        const updatedSecondaryMembership = await this.userMembresiaRepository.save(existingSecondaryMembership);
 
         return this.userMembresiaRepository.findOne({
-          where: { id: updatedSeguimientoMembership.id },
+          where: { id: updatedSecondaryMembership.id },
           relations: ['membresia', 'estado'],
         });
       }
 
-      const createdSeguimientoMembership = this.userMembresiaRepository.create({
+      const createdSecondaryMembership = this.userMembresiaRepository.create({
         userId,
         membresiaId,
         estadoId: estadoPendiente.id,
         membresia,
       });
 
-      const savedSeguimientoMembership = await this.userMembresiaRepository.save(createdSeguimientoMembership);
-
-      const existingSeguimiento = await this.seguimientoRepository.findOne({
-        where: { user: { id: userId } },
-        relations: ['user'],
-      });
-
-      if (!existingSeguimiento) {
-        const seguimiento = this.seguimientoRepository.create({
-          estado: true,
-          user,
-        });
-
-        await this.seguimientoRepository.save(seguimiento);
-      }
+      const savedSecondaryMembership = await this.userMembresiaRepository.save(createdSecondaryMembership);
 
       return this.userMembresiaRepository.findOne({
-        where: { id: savedSeguimientoMembership.id },
+        where: { id: savedSecondaryMembership.id },
         relations: ['membresia', 'estado'],
       });
     }

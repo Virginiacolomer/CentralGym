@@ -5,7 +5,6 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MembresiaModule } from './modules/membresia/membresia.module';
 import { PlanEntrenamientoModule } from './modules/plan-entrenamiento/plan-entrenamiento.module';
-import { SeguimientoModule } from './modules/seguimiento/seguimiento.module';
 import { AppController } from './app.controller';
 @Module({
   controllers: [AppController],
@@ -33,7 +32,6 @@ import { AppController } from './app.controller';
     AuthModule,
     MembresiaModule,
     PlanEntrenamientoModule,
-    SeguimientoModule,
   ],
 })
 export class AppModule {}

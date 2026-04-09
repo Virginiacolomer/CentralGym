@@ -8,10 +8,9 @@ import { UserMembresia } from '../membresia/entities/userMembresia.entity';
 import { EstadoUserMembresia } from '../membresia/entities/estadoUserMembresia.entity';
 import { Membresia } from '../membresia/entities/membresia.entity';
 import { Pago } from '../membresia/entities/pago.entity';
-import { Seguimiento } from '../seguimiento/entities/seguimiento.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, UserMembresia, EstadoUserMembresia, Membresia, Pago, Seguimiento]), AuthModule],
+  imports: [TypeOrmModule.forFeature([User, UserMembresia, EstadoUserMembresia, Membresia, Pago]), AuthModule],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [TypeOrmModule],

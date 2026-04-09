@@ -2,8 +2,7 @@ import { Membresia } from 'src/modules/membresia/entities/membresia.entity';
 import { Pago } from 'src/modules/membresia/entities/pago.entity';
 import { UserMembresia } from 'src/modules/membresia/entities/userMembresia.entity';
 import { PlanEntrenamiento } from 'src/modules/plan-entrenamiento/entities/plan-entrenamiento.entity';
-import { Seguimiento } from 'src/modules/seguimiento/entities/seguimiento.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { UserRole } from '../enums/user-role.enum';
 import { UserStatus } from '../enums/user-status.enum';
 
@@ -36,9 +35,6 @@ export class User {
 
   @Column({ type: 'varchar', length: 20, default: UserStatus.CREADO })
   estado: UserStatus;
-
-  @OneToOne(() => Seguimiento, seguimiento => seguimiento.user, { nullable: true })
-  seguimiento: Seguimiento | null;
 
   @OneToMany(() => UserMembresia, userMembresia => userMembresia.user)
   userMembresias: UserMembresia[];

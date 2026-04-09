@@ -16,9 +16,6 @@ import { MiPlan } from './pages/mi-plan/mi-plan';
 import { MiMembresia } from './pages/mi-membresia/mi-membresia';
 import { MisPagos } from './pages/mis-pagos/mis-pagos';
 import { HistorialDePagos } from './pages/historial-de-pagos/historial-de-pagos';
-import { SeguimientoPersonalizado } from './pages/seguimiento-personalizado/seguimiento-personalizado';
-import { SeguimientoDetalle } from './pages/seguimiento-detalle/seguimiento-detalle';
-import { SeguimientoCliente } from './pages/seguimiento-cliente/seguimiento-cliente';
 import { authGuard } from './core/guards/auth.guard';
 import { publicGuard } from './core/guards/public.guard';
 
@@ -41,15 +38,12 @@ export const routes: Routes = [
 	{ path: 'editar-plan', component: EditarPlan, canActivate: [authGuard], data: { role: 'ADMIN' } },
 	{ path: 'ver-plan', component: VerPlan, canActivate: [authGuard], data: { role: 'ADMIN' } },
 	{ path: 'historial-de-pagos', component: HistorialDePagos, canActivate: [authGuard] },
-	{ path: 'seguimiento-personalizado', component: SeguimientoPersonalizado, canActivate: [authGuard], data: { role: 'ADMIN' } },
-	{ path: 'seguimiento-personalizado/:id', component: SeguimientoDetalle, canActivate: [authGuard], data: { role: 'ADMIN' } },
 
 	// Rutas exclusivas para CLIENTE.
 	{ path: 'menu-cliente', component: MenuCliente, canActivate: [authGuard], data: { role: 'CLIENTE' } },
 	{ path: 'mi-plan', component: MiPlan, canActivate: [authGuard], data: { role: 'CLIENTE' } },
 	{ path: 'mi-membresia', component: MiMembresia, canActivate: [authGuard], data: { role: 'CLIENTE' } },
 	{ path: 'mis-pagos', component: MisPagos, canActivate: [authGuard], data: { role: 'CLIENTE' } },
-	{ path: 'seguimiento-cliente', component: SeguimientoCliente, canActivate: [authGuard], data: { role: 'CLIENTE' } },
 
 	// Comodin: cualquier URL no existente redirige al home.
 	{ path: '**', redirectTo: '' },

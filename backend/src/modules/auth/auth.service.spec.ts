@@ -22,7 +22,6 @@ const buildUser = (overrides: Partial<User> = {}): User => ({
   password_hash: 'hashed-password',
   role: UserRole.CLIENTE,
   estado: UserStatus.ACTIVO,
-  seguimiento: null,
   userMembresias: [],
   pagos: [],
   planEntrenamientoId: null,

@@ -30,7 +30,6 @@ export class GestionUsuarios implements OnInit {
   private readonly usersApiService = inject(UsersApiService);
   private readonly membresiaApiService = inject(MembresiaApiService);
   private readonly cdr = inject(ChangeDetectorRef);
-  private readonly seguimientoMembershipTypeId = 2;
   private readonly entrenamientoMembershipTypeId = 1;
 
   filterTerm = '';
@@ -111,21 +110,6 @@ export class GestionUsuarios implements OnInit {
         : user
     );
     this.cdr.detectChanges();
-  }
-
-  removeSeguimientoMembership(userId: number, membresiaId: number): void {
-    this.usersApiService.removeUserMembership(userId, membresiaId).subscribe({
-      next: () => {
-        this.loadUsers();
-      },
-      error: () => {
-        window.alert('No se pudo eliminar la membresia de seguimiento personalizado.');
-      },
-    });
-  }
-
-  isSeguimientoMembership(membership: UserMembershipSummary): boolean {
-    return membership.tipoMembresiaId === this.seguimientoMembershipTypeId;
   }
 
   applyMembershipChange(userId: number): void {

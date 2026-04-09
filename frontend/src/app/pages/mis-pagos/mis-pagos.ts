@@ -56,7 +56,7 @@ export class MisPagos implements OnInit {
         : `Se registro un pago para ${this.currentMonthLabel}.`;
     }
 
-    return 'Regularice su situación con el entrenador (membresía o seguimiento no abonados)';
+    return 'Regularice su situacion con el entrenador (membresias no abonadas)';
   }
 
   get nextPaymentLabel(): string {
