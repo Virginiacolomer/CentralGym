@@ -37,6 +37,22 @@
   color: #39f45a;
 }
 
+.cert-text {
+  margin: 0;
+  color: #c7d6cc;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.cert-link {
+  color: #9dffad;
+  text-underline-offset: 2px;
+}
+
+.cert-link:hover {
+  color: #d8ffe0;
+}
+
 .lead {
   margin: 0 0 1rem;
   font-size: clamp(1rem, 2.6vw, 1.25rem);

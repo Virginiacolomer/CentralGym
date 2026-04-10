@@ -255,6 +255,12 @@
 	color: #eef2f4;
 }
 
+.cta-coach {
+	background: linear-gradient(120deg, #1f3b2a, #2d5f3f);
+	border: 1px solid rgba(57, 244, 90, 0.45);
+	color: #d8ffe0;
+}
+
 /* Hover del CTA para dar sensacion de elevacion. */
 .cta:hover {
 	transform: translateY(-2px);
