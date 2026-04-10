@@ -1,0 +1,39 @@
+:host {
+	display: block;
+}
+
+.app-shell {
+	min-height: 100svh;
+	display: flex;
+	flex-direction: column;
+}
+
+.app-content {
+	flex: 1 1 auto;
+	padding-bottom: 2.4rem;
+}
+
+.app-footer {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 999;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0.55rem 1rem;
+	background: #7b8188;
+	color: #eef1f4;
+	text-align: center;
+	font-size: 0.79rem;
+	line-height: 1.35;
+	letter-spacing: 0.01em;
+	opacity: 0.94;
+}
+
+@media (max-width: 640px) {
+	.app-footer {
+		font-size: 0.74rem;
+		padding: 0.5rem 0.75rem;
+	}
+}

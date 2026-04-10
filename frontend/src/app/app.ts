@@ -10,7 +10,8 @@ import { RouterOutlet } from '@angular/router';
   // RouterOutlet permite renderizar el componente de la ruta activa.
   imports: [RouterOutlet],
   // Template minimo que contiene <router-outlet>.
-  templateUrl: './app.html'
+  templateUrl: './app.html',
+  styleUrl: './app.css'
 })
 export class App {}
 
