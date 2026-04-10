@@ -24,6 +24,11 @@ import { AppController } from './app.controller';
           autoLoadEntities: true,
           synchronize: !isProduction,
           ssl: isProduction ? { rejectUnauthorized: false } : false,
+          extra: {
+            keepAlive: true,
+            connectionTimeoutMillis: 10000,
+            idleTimeoutMillis: 30000,
+          },
         };
       },
       inject: [ConfigService],

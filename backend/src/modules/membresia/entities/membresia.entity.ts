@@ -5,21 +5,24 @@ import { UserMembresia } from './userMembresia.entity';
 @Entity({ name: 'membresia', schema: 'public' })
 export class Membresia {
     @PrimaryGeneratedColumn()
-    id: number;
+    id!: number;
 
     @Column()
-    nombre: string;
+    nombre!: string;
 
-    @Column()
-    dias: number;
+    @Column({ type: 'varchar', length: 500, nullable: true })
+    descripcion!: string | null;
+
+    @Column({ type: 'varchar', length: 100 })
+    dias!: string;
 
     @Column ()
-    costo: number;
+    costo!: number;
 
-    @ManyToOne(() => TipoMembresia, tipoMembresia => tipoMembresia.membresias)
-    @JoinColumn({ name: 'tipoMembresiaId' })
-    tipoMembresia: TipoMembresia;
+  @ManyToOne(() => TipoMembresia, (tipoMembresia: TipoMembresia) => tipoMembresia.membresias)
+  @JoinColumn({ name: 'tipoMembresiaId' })
+  tipoMembresia!: TipoMembresia;
 
-    @OneToMany(() => UserMembresia, userMembresia => userMembresia.membresia)
-    userMembresias: UserMembresia[];
+  @OneToMany(() => UserMembresia, (userMembresia: UserMembresia) => userMembresia.membresia)
+    userMembresias!: UserMembresia[];
 }

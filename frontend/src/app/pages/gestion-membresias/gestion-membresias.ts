@@ -10,9 +10,11 @@ interface MembershipOption {
   id: number | null;
   name: string;
   draftName: string;
+  description: string;
+  draftDescription: string;
   amount: number;
   draftAmount: string;
-  frequency: number;
+  frequency: string;
   draftFrequency: string;
   typeId: number | null;
   draftTypeId: number | null;
@@ -50,9 +52,12 @@ export class GestionMembresias implements OnInit {
 
     membership.isEditing = true;
     membership.draftName = membership.name;
+    membership.draftDescription = membership.description;
     membership.draftAmount = String(membership.amount);
-    membership.draftFrequency = String(membership.frequency);
+    membership.draftFrequency = membership.frequency;
     membership.draftTypeId = membership.typeId;
+
+    this.resizeDescriptionTextareas();
   }
 
   saveMembership(id: number | null): void {
@@ -62,8 +67,9 @@ export class GestionMembresias implements OnInit {
     }
 
     const normalizedName = membership.draftName.trim();
+    const normalizedDescription = membership.draftDescription.trim();
     const parsedAmount = this.parseAmount(membership.draftAmount);
-    const parsedFrequency = this.parseDays(membership.draftFrequency);
+    const parsedFrequency = this.parseFrequencyText(membership.draftFrequency);
     const parsedTypeId = this.parseTypeId(membership.draftTypeId);
 
     if (!normalizedName) {
@@ -88,6 +94,7 @@ export class GestionMembresias implements OnInit {
 
     const payload = {
       nombre: normalizedName,
+      descripcion: normalizedDescription || undefined,
       costo: parsedAmount,
       dias: parsedFrequency,
       tipoMembresiaId: parsedTypeId,
@@ -129,10 +136,12 @@ export class GestionMembresias implements OnInit {
       id: null,
       name: '',
       draftName: '',
+      description: '',
+      draftDescription: '',
       amount: 0,
       draftAmount: '0',
-      frequency: 1,
-      draftFrequency: '1',
+      frequency: '1 SEMANA',
+      draftFrequency: '1 SEMANA',
       typeId: this.membershipTypes[0]?.id ?? null,
       draftTypeId: this.membershipTypes[0]?.id ?? null,
       isEditing: true,
@@ -142,6 +151,17 @@ export class GestionMembresias implements OnInit {
     };
 
     this.memberships = [newMembership, ...this.memberships];
+    this.resizeDescriptionTextareas();
+  }
+
+  autoResizeDescription(event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement | null;
+    if (!textarea) {
+      return;
+    }
+
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
   }
 
   cancelEditing(id: number | null): void {
@@ -160,8 +180,9 @@ export class GestionMembresias implements OnInit {
 
     membership.isEditing = false;
     membership.draftName = membership.name;
+    membership.draftDescription = membership.description;
     membership.draftAmount = String(membership.amount);
-    membership.draftFrequency = String(membership.frequency);
+    membership.draftFrequency = membership.frequency;
     membership.draftTypeId = membership.typeId;
   }
 
@@ -207,7 +228,7 @@ export class GestionMembresias implements OnInit {
   }
 
   trackMembership(_: number, membership: MembershipOption): number | string {
-    return membership.id ?? `new-${membership.draftName}-${membership.draftAmount}`;
+    return membership.id ?? `new-${membership.draftName}-${membership.draftDescription}-${membership.draftAmount}`;
   }
 
   private loadMemberships(): void {
@@ -252,15 +273,26 @@ export class GestionMembresias implements OnInit {
     });
   }
 
+  private resizeDescriptionTextareas(): void {
+    queueMicrotask(() => {
+      document.querySelectorAll<HTMLTextAreaElement>('.description-input').forEach((textarea) => {
+        textarea.style.height = 'auto';
+        textarea.style.height = `${textarea.scrollHeight}px`;
+      });
+    });
+  }
+
   private mapMembership(membership: Membresia): MembershipOption {
     return {
       id: membership.id,
       name: membership.nombre,
       draftName: membership.nombre,
+      description: membership.descripcion?.trim() || '',
+      draftDescription: membership.descripcion?.trim() || '',
       amount: membership.costo,
       draftAmount: String(membership.costo),
       frequency: membership.dias,
-      draftFrequency: String(membership.dias),
+      draftFrequency: membership.dias,
       typeId: membership.tipoMembresia?.id ?? null,
       draftTypeId: membership.tipoMembresia?.id ?? null,
       isEditing: false,
@@ -284,18 +316,13 @@ export class GestionMembresias implements OnInit {
     return Math.round(numericValue);
   }
 
-  private parseDays(input: string): number | null {
-    const cleanInput = input.replace(/[^0-9]/g, '');
+  private parseFrequencyText(input: string): string | null {
+    const cleanInput = input.trim();
     if (!cleanInput) {
       return null;
     }
 
-    const numericValue = Number(cleanInput);
-    if (!Number.isFinite(numericValue) || numericValue <= 0) {
-      return null;
-    }
-
-    return Math.round(numericValue);
+    return cleanInput;
   }
 
   private parseTypeId(input: number | null): number | null {

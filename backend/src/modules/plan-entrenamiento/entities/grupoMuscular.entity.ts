@@ -4,11 +4,11 @@ import { Ejercicio } from './ejercicio.entity';
 @Entity({ name: 'grupoMuscular', schema: 'public' })
 export class GrupoMuscular {
     @PrimaryGeneratedColumn()
-    id: number;
+    id!: number;
 
     @Column()
-    nombre: string;
+    nombre!: string;
 
-    @OneToMany(() => Ejercicio, (ejercicio) => ejercicio.grupoMuscular)
-    ejercicios: Ejercicio[];
+    @OneToMany(() => Ejercicio, (ejercicio: Ejercicio) => ejercicio.grupoMuscular)
+    ejercicios!: Ejercicio[];
 }

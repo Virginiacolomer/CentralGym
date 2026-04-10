@@ -4,11 +4,11 @@ import { Membresia } from './membresia.entity';
 @Entity({ name: 'tipoMembresia', schema: 'public' })
 export class TipoMembresia {
     @PrimaryGeneratedColumn()
-    id: number;
+    id!: number;
 
     @Column()
-    nombre: string;
+    nombre!: string;
     
-    @OneToMany(() => Membresia, membresia => membresia.tipoMembresia)
-    membresias: Membresia[];
+    @OneToMany(() => Membresia, (membresia: Membresia) => membresia.tipoMembresia)
+    membresias!: Membresia[];
 }

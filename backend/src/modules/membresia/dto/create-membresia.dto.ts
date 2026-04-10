@@ -1,15 +1,20 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsPositive, IsString, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, MaxLength, Min } from 'class-validator';
 
 export class CreateMembresiaDto {
 	@IsNotEmpty({ message: 'El nombre de la membresia es obligatorio.' })
 	@IsString({ message: 'El nombre de la membresia debe ser texto.' })
 	nombre: string;
 
-	@Type(() => Number)
-	@IsInt({ message: 'Los dias de la membresia deben ser un numero entero.' })
-	@Min(1, { message: 'Los dias de la membresia deben ser mayores a 0.' })
-	dias: number;
+	@IsOptional()
+	@IsString({ message: 'La descripcion de la membresia debe ser texto.' })
+	@MaxLength(500, { message: 'La descripcion de la membresia no puede superar los 500 caracteres.' })
+	descripcion?: string;
+
+	@IsNotEmpty({ message: 'La frecuencia de la membresia es obligatoria.' })
+	@IsString({ message: 'La frecuencia de la membresia debe ser texto.' })
+	@MaxLength(100, { message: 'La frecuencia de la membresia no puede superar los 100 caracteres.' })
+	dias: string;
 
 	@Type(() => Number)
 	@IsInt({ message: 'El costo de la membresia debe ser un numero entero.' })

@@ -19,6 +19,7 @@ type ExerciseRow = {
 type TrainingDay = {
   label: string;
   expanded: boolean;
+  description?: string;
   exercises: ExerciseRow[];
 };
 
@@ -350,7 +351,7 @@ export class VerPlan implements OnInit {
   private loadDbPlans(): void {
     this.planEntrenamientoApiService.getAllPlans().subscribe({
       next: (plans) => {
-        this.dbPlans = plans;
+        this.dbPlans = plans.filter((plan) => (plan.tipo ?? 'predeterminado') === 'predeterminado');
         this.cdr.detectChanges();
       },
       error: () => {
@@ -386,6 +387,8 @@ export class VerPlan implements OnInit {
           this.buildExerciseNameMap(catalogo);
           const response = planData;
 
+          console.log('[ver-plan] planData.plan (raw):', response.plan);
+
           if (!response.plan) {
             this.days = [];
             this.currentPlan = null;
@@ -397,6 +400,7 @@ export class VerPlan implements OnInit {
 
           this.currentPlan = response.plan;
           this.days = this.mapPlanToDays(response.plan);
+          console.log('[ver-plan] days mapeados:', this.days.map((day) => ({ label: day.label, description: day.description })));
           this.saveOriginalDays();
           this.cdr.detectChanges();
         },
@@ -411,14 +415,18 @@ export class VerPlan implements OnInit {
   }
 
   private mapPlanToDays(plan: PlanEntrenamientoResponse): TrainingDay[] {
+    const dayDescriptions = this.extractDayDescriptions(plan);
+
     return Array.from({ length: plan.cantidadDias }, (_, dayIndex) => {
       const ejerciciosDia = plan.ejercicios[dayIndex];
       const repeticionesDia = plan.repeticiones[dayIndex];
+      const descripcionDia = dayDescriptions[dayIndex] ?? '';
 
       if (!Array.isArray(ejerciciosDia) || ejerciciosDia.length === 0) {
         return {
           label: `Dia ${dayIndex + 1}`,
           expanded: false,
+          description: descripcionDia || undefined,
           exercises: [],
         };
       }
@@ -426,12 +434,51 @@ export class VerPlan implements OnInit {
       return {
         label: `Dia ${dayIndex + 1}`,
         expanded: false,
+        description: descripcionDia || undefined,
         exercises: ejerciciosDia.map((id, exerciseIndex) => ({
           exercise: this.resolveExerciseName(id),
           workload: Array.isArray(repeticionesDia) ? (repeticionesDia[exerciseIndex] ?? '') : '',
         })),
       };
     });
+  }
+
+  private extractDayDescriptions(plan: PlanEntrenamientoResponse): string[] {
+    const raw = plan as unknown as Record<string, unknown>;
+    const candidate =
+      raw['descripciones_dias'] ??
+      raw['descripcionesDias'] ??
+      raw['descripcionesdias'] ??
+      null;
+
+    console.log('[ver-plan] candidate descripciones:', candidate);
+
+    let parsed: unknown = candidate;
+
+    if (typeof parsed === 'string') {
+      try {
+        parsed = JSON.parse(parsed);
+      } catch {
+        parsed = [];
+      }
+    }
+
+    if (Array.isArray(parsed)) {
+      console.log('[ver-plan] parsed descripciones (array):', parsed);
+      return parsed.map((item) => (typeof item === 'string' ? item.trim() : '')).filter((_, index) => true);
+    }
+
+    if (parsed && typeof parsed === 'object') {
+      console.log('[ver-plan] parsed descripciones (object):', parsed);
+      const values = Object.entries(parsed)
+        .sort(([a], [b]) => Number(a) - Number(b))
+        .map(([, value]) => (typeof value === 'string' ? value.trim() : ''));
+      return values;
+    }
+
+    console.log('[ver-plan] parsed descripciones vacio.');
+
+    return [];
   }
 
   private buildExerciseNameMap(grupos: CatalogoGrupoMuscular[]): void {
@@ -524,6 +571,14 @@ export class VerPlan implements OnInit {
       cantidadDias,
       ejercicios,
       repeticiones,
+      descripcionesDias: Array.from({ length: 7 }, (_, dayIndex) => {
+        if (dayIndex >= cantidadDias) {
+          return null;
+        }
+
+        const value = this.days[dayIndex]?.description?.trim() ?? '';
+        return value || null;
+      }),
     };
   }
 
@@ -585,14 +640,20 @@ export class VerPlan implements OnInit {
 
     document.setTextColor(16, 19, 20);
     document.setFont('helvetica', 'normal');
+    if (this.currentPlan?.nombre) {
+      addParagraph(`Plan: ${this.currentPlan.nombre}`, 13, 2);
+    }
     addParagraph(`Alumno: ${this.selectedUserName}`, 13, 6);
 
     for (const day of this.days) {
       ensureSpace(18);
       document.setFont('helvetica', 'bold');
       document.setFontSize(14);
-      document.text(day.label, margin, cursorY);
-      cursorY += 7;
+      const dayHeading = day.description ? `${day.label} - ${day.description}` : day.label;
+      const dayHeadingLines = document.splitTextToSize(dayHeading, contentWidth);
+      document.text(dayHeadingLines, margin, cursorY);
+      cursorY += dayHeadingLines.length * 5;
+      cursorY += 2;
 
       document.setFont('helvetica', 'normal');
       document.setFontSize(11);

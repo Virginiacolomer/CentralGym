@@ -1,0 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Teko:wght@500;700&display=swap');
+
+:host {
+  display: block;
+}
+
+.hours-page {
+  --green: #39f45a;
+  --text: #e9edf0;
+  color: var(--text);
+  font-family: 'Sora', sans-serif;
+}
+
+.hours-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.15rem 2rem 1.1rem;
+}
+
+.hours-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 1.8rem;
+  align-items: start;
+}
+
+.hours-copy h1 {
+  margin: 1rem 0 0.7rem;
+  font-family: 'Teko', sans-serif;
+  font-size: clamp(3.2rem, 6vw, 4.8rem);
+  line-height: 0.85;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--green);
+}
+
+.hours-copy > p {
+  margin: 0 0 1.25rem;
+  max-width: 550px;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: #d2dde1;
+}
+
+.hours-card {
+  padding: 1.2rem 1.25rem;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(140deg, rgba(57, 244, 90, 0.18), rgba(57, 244, 90, 0) 36%), #050708;
+  max-width: 560px;
+}
+
+.hours-block h2 {
+  margin: 0 0 0.55rem;
+  font-family: 'Teko', sans-serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 0.88;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+.slot {
+  margin-bottom: 0.9rem;
+}
+
+.slot:last-child {
+  margin-bottom: 0;
+}
+
+.slot span {
+  display: block;
+  margin-bottom: 0.15rem;
+  font-size: 1.55rem;
+  line-height: 1;
+  color: #8df45d;
+  font-family: 'Teko', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.slot strong,
+.hours-block--compact strong {
+  display: block;
+  font-size: clamp(2.05rem, 5vw, 3.3rem);
+  line-height: 0.94;
+  letter-spacing: 0.01em;
+  color: #edf1f3;
+  font-family: 'Teko', sans-serif;
+}
+
+.hours-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.24);
+  margin: 1rem 0;
+}
+
+.hours-side-card {
+  padding: 1.3rem;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(81, 88, 98, 0.95), rgba(60, 66, 76, 0.95));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.side-badge {
+  display: inline-flex;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(57, 244, 90, 0.14);
+  color: #baf8c5;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.hours-side-card h2 {
+  margin: 0.9rem 0 0.65rem;
+  font-family: 'Teko', sans-serif;
+  font-size: clamp(2.4rem, 5vw, 3.7rem);
+  line-height: 0.9;
+  color: #39f45a;
+  text-transform: uppercase;
+}
+
+.hours-side-card p {
+  margin: 0;
+  color: #edf1f3;
+  line-height: 1.55;
+}
+
+@media (max-width: 900px) {
+  .hours-shell {
+    padding: 1rem 1.2rem 1.1rem;
+  }
+
+  .hours-grid {
+    grid-template-columns: 1fr;
+  }
+}

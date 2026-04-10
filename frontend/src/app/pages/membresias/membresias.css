@@ -161,6 +161,10 @@
   color: rgba(232, 236, 239, 0.7);
 }
 
+.plan-description {
+  white-space: pre-line;
+}
+
 .plan-row strong {
   font-size: 1.68rem;
   font-family: 'Teko', sans-serif;
@@ -178,73 +182,36 @@
   color: #e8ecef;
 }
 
-.hours-card {
-  margin-top: 1.2rem;
-  padding: 1.15rem 1.2rem;
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background:
-    linear-gradient(140deg, rgba(57, 244, 90, 0.18), rgba(57, 244, 90, 0) 36%),
-    #050708;
-  max-width: 520px;
-}
-
-.hours-card h2 {
-  margin: 0 0 0.8rem;
+.nutrition-coach-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1.4rem;
+  width: min(100%, 520px);
+  padding: 0.88rem 1rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #39f45a 0%, #86ff38 100%);
+  color: #0b1a10;
   font-family: 'Teko', sans-serif;
-  font-size: clamp(2rem, 4vw, 2.8rem);
-  line-height: 0.9;
-  letter-spacing: 0.02em;
+  font-size: clamp(1.45rem, 3.5vw, 2rem);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 0.95;
+  text-decoration: none;
   text-transform: uppercase;
-  color: var(--green);
+  box-shadow: 0 10px 28px rgba(57, 244, 90, 0.32), inset 0 -2px 0 rgba(11, 26, 16, 0.22);
+  transition: transform 160ms ease, filter 160ms ease, box-shadow 160ms ease;
 }
 
-.hours-block h3 {
-  margin: 0 0 0.55rem;
-  font-family: 'Teko', sans-serif;
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 0.88;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--green);
+.nutrition-coach-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.04);
+  box-shadow: 0 14px 30px rgba(57, 244, 90, 0.4), inset 0 -2px 0 rgba(11, 26, 16, 0.22);
 }
 
-.slot {
-  margin-bottom: 0.9rem;
-}
-
-.slot:last-child {
-  margin-bottom: 0;
-}
-
-.slot span {
-  display: block;
-  margin-bottom: 0.15rem;
-  font-size: 1.55rem;
-  line-height: 1;
-  color: #8df45d;
-  font-family: 'Teko', sans-serif;
-  letter-spacing: 0.02em;
-}
-
-.slot strong,
-.hours-block--compact strong {
-  display: block;
-  font-size: clamp(2.05rem, 5vw, 3.3rem);
-  line-height: 0.94;
-  letter-spacing: 0.01em;
-  color: #edf1f3;
-  font-family: 'Teko', sans-serif;
-}
-
-.hours-divider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.24);
-  margin: 1rem 0;
-}
-
-.hours-block--compact {
-  text-align: left;
+.nutrition-coach-btn:focus-visible {
+  outline: 2px solid #e9edf0;
+  outline-offset: 2px;
 }
 
 .image-card {

@@ -28,6 +28,13 @@ export class PlanEntrenamientoController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
+  @Post('grupos-musculares')
+  createGrupoMuscular(@Body() createGrupoMuscularDto: { nombre: string }) {
+    return this.planEntrenamientoService.createGrupoMuscular(createGrupoMuscularDto);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Get()
   findAll() {
     return this.planEntrenamientoService.findAll();
@@ -67,6 +74,20 @@ export class PlanEntrenamientoController {
   @Get('grupos-musculares/:id')
   findGrupoMuscularById(@Param('id') id: string) {
     return this.planEntrenamientoService.findGrupoMuscularById(+id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.CLIENTE)
+  @Get('grupos-musculares/:id/ejercicios')
+  findEjerciciosByGrupoMuscularId(@Param('id') id: string) {
+    return this.planEntrenamientoService.findEjerciciosByGrupoMuscularId(+id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.CLIENTE)
+  @Get('grupos-musculares-resumen')
+  findGruposMuscularesResumen() {
+    return this.planEntrenamientoService.findGruposMuscularesResumen();
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

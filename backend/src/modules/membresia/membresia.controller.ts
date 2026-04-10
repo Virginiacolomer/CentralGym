@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Query, ParseIntPipe } from '@nestjs/common';
 import { MembresiaService } from './membresia.service';
 import { CreateMembresiaDto } from './dto/create-membresia.dto';
 import { UpdateMembresiaDto } from './dto/update-membresia.dto';
@@ -72,6 +72,23 @@ export class MembresiaController {
     return this.membresiaService.assignMembershipToUser(request.user.sub, body.membresiaId);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Get('pagos/rango')
+  findPaymentsByDateRange(
+    @Query('desde') desde: string,
+    @Query('hasta') hasta: string,
+  ) {
+    return this.membresiaService.findPaymentsByDateRange(desde, hasta);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Get('reporte/metricas-mes-actual')
+  getCurrentMonthReportMetrics() {
+    return this.membresiaService.getCurrentMonthReportMetrics();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.membresiaService.findOne(+id);
@@ -80,8 +97,8 @@ export class MembresiaController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.CLIENTE)
   @Get('pagos/:id')
-  findPagoById(@Param('id') id: string) {
-    return this.membresiaService.findPagoById(+id);
+  findPagoById(@Param('id', ParseIntPipe) id: number) {
+    return this.membresiaService.findPagoById(id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

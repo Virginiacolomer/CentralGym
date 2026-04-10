@@ -1,6 +1,6 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, Logger, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreateMembresiaDto } from './dto/create-membresia.dto';
 import { UpdateMembresiaDto } from './dto/update-membresia.dto';
 import { Membresia } from './entities/membresia.entity';
@@ -10,7 +10,9 @@ import { EstadoUserMembresia } from './entities/estadoUserMembresia.entity';
 import { UserMembresia } from './entities/userMembresia.entity';
 
 @Injectable()
-export class MembresiaService {
+export class MembresiaService implements OnModuleInit {
+  private readonly logger = new Logger(MembresiaService.name);
+
   constructor(
     @InjectRepository(Membresia)
     private readonly membresiaRepository: Repository<Membresia>,
@@ -22,14 +24,43 @@ export class MembresiaService {
     private readonly estadoUserMembresiaRepository: Repository<EstadoUserMembresia>,
     @InjectRepository(UserMembresia)
     private readonly userMembresiaRepository: Repository<UserMembresia>,
+    private readonly dataSource: DataSource,
   ) {}
+
+  async onModuleInit(): Promise<void> {
+    await this.ensureDiasColumnIsText();
+  }
+
+  private async ensureDiasColumnIsText(): Promise<void> {
+    await this.dataSource.query(`
+      DO $$
+      DECLARE current_data_type text;
+      BEGIN
+        SELECT data_type
+        INTO current_data_type
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'membresia'
+          AND column_name = 'dias';
+
+        IF current_data_type IS NOT NULL AND current_data_type <> 'character varying' THEN
+          ALTER TABLE public.membresia
+          ALTER COLUMN dias TYPE varchar(100)
+          USING dias::text;
+        END IF;
+      END $$;
+    `);
+
+    this.logger.log('Schema check complete for membresia.dias as text frequency');
+  }
 
   async create(createMembresiaDto: CreateMembresiaDto) {
     const tipoMembresia = await this.findTipoMembresiaById(createMembresiaDto.tipoMembresiaId);
 
     const membresia = this.membresiaRepository.create({
       nombre: createMembresiaDto.nombre.trim(),
-      dias: createMembresiaDto.dias,
+      descripcion: createMembresiaDto.descripcion?.trim() || null,
+      dias: createMembresiaDto.dias.trim(),
       costo: createMembresiaDto.costo,
       tipoMembresia,
     });
@@ -111,8 +142,12 @@ export class MembresiaService {
       membresia.nombre = updateMembresiaDto.nombre.trim();
     }
 
-    if (typeof updateMembresiaDto.dias === 'number') {
-      membresia.dias = updateMembresiaDto.dias;
+    if (typeof updateMembresiaDto.descripcion === 'string') {
+      membresia.descripcion = updateMembresiaDto.descripcion.trim() || null;
+    }
+
+    if (typeof updateMembresiaDto.dias === 'string') {
+      membresia.dias = updateMembresiaDto.dias.trim();
     }
 
     if (typeof updateMembresiaDto.costo === 'number') {
@@ -278,6 +313,88 @@ export class MembresiaService {
         costo: payment.costo === null ? null : Number(payment.costo),
       };
     });
+  }
+
+  async findPaymentsByDateRange(desde: string, hasta: string) {
+    const rawPayments = await this.pagoRepository
+      .createQueryBuilder('pago')
+      .leftJoin('pago.userMembresia', 'userMembresia')
+      .leftJoin('pago.membresia', 'membresiaPago')
+      .leftJoin('membresiaPago.tipoMembresia', 'tipoPago')
+      .leftJoin('userMembresia.membresia', 'membresiaFallback')
+      .leftJoin('membresiaFallback.tipoMembresia', 'tipoFallback')
+      .select('pago.id', 'id')
+      .addSelect('COALESCE(pago.user_id, userMembresia.user_id)', 'userId')
+      .addSelect('pago.created_at', 'createdAt')
+      .addSelect('COALESCE(membresiaPago.id, membresiaFallback.id)', 'membresiaId')
+      .addSelect("COALESCE(membresiaPago.nombre, membresiaFallback.nombre, 'Sin membresia')", 'membresiaNombre')
+      .addSelect('COALESCE(tipoPago.nombre, tipoFallback.nombre)', 'tipoMembresiaNombre')
+      // Prioriza la membresia registrada en el pago y solo usa fallback si ese dato no existe.
+      .addSelect('COALESCE(membresiaPago.costo, membresiaFallback.costo)', 'costo')
+      .where(
+        "(pago.created_at AT TIME ZONE 'America/Argentina/Buenos_Aires')::date >= :desde",
+        { desde },
+      )
+      .andWhere(
+        "(pago.created_at AT TIME ZONE 'America/Argentina/Buenos_Aires')::date <= :hasta",
+        { hasta },
+      )
+      .orderBy('pago.created_at', 'DESC')
+      .getRawMany<{
+        id: string;
+        userId: string | null;
+        createdAt: string;
+        membresiaId: string | null;
+        membresiaNombre: string | null;
+        tipoMembresiaNombre: string | null;
+        costo: string | null;
+      }>();
+
+    return rawPayments.map((payment) => ({
+      id: Number(payment.id),
+      userId: payment.userId === null ? null : Number(payment.userId),
+      createdAt: new Date(payment.createdAt),
+      membresiaId: payment.membresiaId === null ? null : Number(payment.membresiaId),
+      membresiaNombre: payment.membresiaNombre ?? 'Sin membresia',
+      tipoMembresiaNombre: payment.tipoMembresiaNombre ?? null,
+      costo: payment.costo === null ? null : Number(payment.costo),
+    }));
+  }
+
+  async getCurrentMonthReportMetrics() {
+    const pendingCountRaw = await this.userMembresiaRepository
+      .createQueryBuilder('userMembresia')
+      .leftJoin('userMembresia.estado', 'estado')
+      .select('COUNT(DISTINCT userMembresia.user_id)', 'count')
+      .where("estado.nombre = 'PENDIENTE_PAGO'")
+      .getRawOne<{ count: string }>();
+
+    const membershipsByMonthRaw = await this.userMembresiaRepository
+      .createQueryBuilder('userMembresia')
+      .leftJoin('userMembresia.membresia', 'membresia')
+      .select('membresia.id', 'membresiaId')
+      .addSelect('membresia.nombre', 'membresiaNombre')
+      .addSelect('COUNT(*)', 'cantidad')
+      .where(
+        "DATE_TRUNC('month', userMembresia.created_at AT TIME ZONE 'America/Argentina/Buenos_Aires') = DATE_TRUNC('month', NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires')",
+      )
+      .groupBy('membresia.id')
+      .addGroupBy('membresia.nombre')
+      .orderBy('membresia.nombre', 'ASC')
+      .getRawMany<{
+        membresiaId: string;
+        membresiaNombre: string;
+        cantidad: string;
+      }>();
+
+    return {
+      pendingPaymentUsersCurrentMonth: Number(pendingCountRaw?.count ?? 0),
+      membershipsChosenCurrentMonth: membershipsByMonthRaw.map((row) => ({
+        membresiaId: Number(row.membresiaId),
+        membresiaNombre: row.membresiaNombre,
+        cantidad: Number(row.cantidad),
+      })),
+    };
   }
 
   async findAllPaymentsForUser(userId: number) {

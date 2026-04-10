@@ -1,7 +1,7 @@
-import { Membresia } from 'src/modules/membresia/entities/membresia.entity';
-import { Pago } from 'src/modules/membresia/entities/pago.entity';
-import { UserMembresia } from 'src/modules/membresia/entities/userMembresia.entity';
-import { PlanEntrenamiento } from 'src/modules/plan-entrenamiento/entities/plan-entrenamiento.entity';
+import { Membresia } from '../../membresia/entities/membresia.entity';
+import { Pago } from '../../membresia/entities/pago.entity';
+import { UserMembresia } from '../../membresia/entities/userMembresia.entity';
+import { PlanEntrenamiento } from '../../plan-entrenamiento/entities/plan-entrenamiento.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { UserRole } from '../enums/user-role.enum';
 import { UserStatus } from '../enums/user-status.enum';
@@ -9,46 +9,46 @@ import { UserStatus } from '../enums/user-status.enum';
 @Entity({ name: 'user', schema: 'public' })
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  nombre: string;
+  nombre!: string;
 
   @Column()
-  apellido: string;
+  apellido!: string;
 
   @Column()
-  dni: string;
+  dni!: string;
 
   @Column({ unique: true })
-  email: string;
+  email!: string;
 
   @Column({ name: 'password_hash' })
-  password_hash: string;
+  password_hash!: string;
 
   @Column({ 
     type: 'enum', 
     enum: UserRole, 
     default: UserRole.CLIENTE 
   })
-  role: UserRole;
+  role!: UserRole;
 
   @Column({ type: 'varchar', length: 20, default: UserStatus.CREADO })
-  estado: UserStatus;
+  estado!: UserStatus;
 
-  @OneToMany(() => UserMembresia, userMembresia => userMembresia.user)
-  userMembresias: UserMembresia[];
+  @OneToMany(() => UserMembresia, (userMembresia: UserMembresia) => userMembresia.user)
+  userMembresias!: UserMembresia[];
 
   // Relacion de conveniencia para consultas con join explicito
   membresias?: Membresia[];
 
-  @OneToMany(() => Pago, pago => pago.user)
-  pagos: Pago[];
+  @OneToMany(() => Pago, (pago: Pago) => pago.user)
+  pagos!: Pago[];
 
   @Column({ name: 'plan_entrenamiento_id', type: 'int', nullable: true })
-  planEntrenamientoId: number | null;
+  planEntrenamientoId!: number | null;
 
   @ManyToOne(() => PlanEntrenamiento, { nullable: true })
   @JoinColumn({ name: 'plan_entrenamiento_id' })
-  planEntrenamiento: PlanEntrenamiento | null;
+  planEntrenamiento!: PlanEntrenamiento | null;
 }

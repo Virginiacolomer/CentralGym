@@ -1,12 +1,11 @@
 ﻿import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { finalize, firstValueFrom, timeout } from 'rxjs';
+import { timeout } from 'rxjs';
 import { PageHeaderCompactComponent } from '../../shared/page-header-compact/page-header-compact';
 import { PageBgComponent } from '../../shared/page-bg/page-bg';
 import {
   CatalogoEjercicio,
   CatalogoGrupoMuscular,
-  CreateEjercicioResponse,
   CreatePlanEntrenamientoRequest,
   PlanEntrenamientoApiService,
 } from '../../core/services/plan-entrenamiento-api.service';
@@ -14,13 +13,13 @@ import {
 type ExerciseRow = {
   muscleGroupId: number | null;
   ejercicioId: number | null;
-  customExerciseName: string;
   repeticiones: string;
 };
 
 type DayConfig = {
   label: string;
   expanded: boolean;
+  descripcion: string;
   rows: ExerciseRow[];
 };
 
@@ -34,7 +33,6 @@ export class CrearPlan implements OnInit, OnDestroy {
   private readonly planEntrenamientoApiService = inject(PlanEntrenamientoApiService);
   private readonly cdr = inject(ChangeDetectorRef);
   private statusTimeoutId: ReturnType<typeof setTimeout> | null = null;
-  private readonly customExerciseOptionId = -1;
 
   planTitle = '';
   frequencyDays = 1;
@@ -92,32 +90,11 @@ export class CrearPlan implements OnInit, OnDestroy {
     const row = this.configuredDays[dayIndex]?.rows[rowIndex];
     if (row) {
       row.ejercicioId = null;
-      row.customExerciseName = '';
     }
   }
 
   onExerciseChange(dayIndex: number, rowIndex: number): void {
-    const row = this.configuredDays[dayIndex]?.rows[rowIndex];
-    if (!row) {
-      return;
-    }
-
-    if (row.ejercicioId !== this.customExerciseOptionId) {
-      row.customExerciseName = '';
-    }
-  }
-
-  onCustomExerciseInput(dayIndex: number, rowIndex: number, value: string): void {
-    const row = this.configuredDays[dayIndex]?.rows[rowIndex];
-    if (!row) {
-      return;
-    }
-
-    row.customExerciseName = this.normalizeExerciseName(value);
-  }
-
-  isCustomExerciseSelected(row: ExerciseRow): boolean {
-    return row.ejercicioId === this.customExerciseOptionId;
+    // Clear on change
   }
 
   getExercisesForGroup(groupId: number | null): CatalogoEjercicio[] {
@@ -132,67 +109,42 @@ export class CrearPlan implements OnInit, OnDestroy {
       return;
     }
 
-    this.isSaving = true;
+    const payload = this.buildPayload();
+    if (!payload) {
+      return;
+    }
+
+    // Optimistic update: resetear y mostrar éxito inmediatamente
+    this.isSaving = false;
+    this.resetForm();
+    this.showStatus(
+      `✓ Plan "${payload.nombre}" guardado correctamente`,
+      'success',
+      4000,
+    );
     this.cdr.detectChanges();
 
-    this.ensureCustomExercisesCreated()
-      .then(() => {
-        const payload = this.buildPayload();
-        if (!payload) {
-          this.isSaving = false;
+    // Enviar al servidor en background sin bloquear UI
+    this.planEntrenamientoApiService
+      .createPlan(payload)
+      .pipe(timeout(35000))
+      .subscribe({
+        next: () => {
+          // Plan guardado exitosamente en servidor - nada más que hacer
+        },
+        error: (error: unknown) => {
+          const backendMessage =
+            typeof error === 'object' && error !== null && 'error' in error
+              ? (error as { error?: { message?: string | string[] } }).error?.message
+              : null;
+
+          const message = Array.isArray(backendMessage)
+            ? backendMessage[0]
+            : backendMessage ?? 'Hubo un error al guardar el plan en el servidor.';
+
+          this.showStatus(message, 'error', 8000);
           this.cdr.detectChanges();
-          return;
-        }
-
-        this.showStatus('Guardando plan en la base de datos...', 'info');
-
-        this.planEntrenamientoApiService
-          .createPlan(payload)
-          .pipe(
-            timeout(15000),
-            finalize(() => {
-              this.isSaving = false;
-              this.cdr.detectChanges();
-            }),
-          )
-          .subscribe({
-            next: () => {
-              this.resetForm();
-              this.showStatus(
-                `Plan "${payload.nombre}" registrado correctamente en la base de datos.`,
-                'success',
-                3000,
-              );
-              this.cdr.detectChanges();
-            },
-            error: (error: unknown) => {
-              const backendMessage =
-                typeof error === 'object' && error !== null && 'error' in error
-                  ? (error as { error?: { message?: string | string[] } }).error?.message
-                  : null;
-
-              const message = Array.isArray(backendMessage)
-                ? backendMessage[0]
-                : backendMessage ?? 'No se pudo crear el plan. Intenta nuevamente.';
-
-              this.showStatus(message, 'error', 8000);
-              this.cdr.detectChanges();
-            },
-          });
-      })
-      .catch((error: unknown) => {
-        const backendMessage =
-          typeof error === 'object' && error !== null && 'error' in error
-            ? (error as { error?: { message?: string | string[] } }).error?.message
-            : null;
-
-        const message = Array.isArray(backendMessage)
-          ? backendMessage[0]
-          : backendMessage ?? (error instanceof Error ? error.message : 'No se pudo crear el plan. Intenta nuevamente.');
-
-        this.showStatus(message, 'error', 8000);
-        this.isSaving = false;
-        this.cdr.detectChanges();
+        },
       });
   }
 
@@ -204,89 +156,11 @@ export class CrearPlan implements OnInit, OnDestroy {
   }
 
   private createEmptyDay(num: number): DayConfig {
-    return { label: `Dia ${num}`, expanded: false, rows: [this.createEmptyRow()] };
+    return { label: `Dia ${num}`, expanded: false, descripcion: '', rows: [this.createEmptyRow()] };
   }
 
   private createEmptyRow(): ExerciseRow {
-    return { muscleGroupId: null, ejercicioId: null, customExerciseName: '', repeticiones: '' };
-  }
-
-  private normalizeExerciseName(value: string): string {
-    return String(value ?? '')
-      .trim()
-      .replace(/\s+/g, ' ')
-      .toUpperCase();
-  }
-
-  private exerciseExists(nombre: string): boolean {
-    const normalized = this.normalizeExerciseName(nombre);
-    return this.muscleGroups.some((group) =>
-      (group.ejercicios ?? []).some(
-        (ejercicio) => this.normalizeExerciseName(ejercicio.nombre) === normalized,
-      ),
-    );
-  }
-
-  private async ensureCustomExercisesCreated(): Promise<void> {
-    for (let dayIndex = 0; dayIndex < this.frequencyDays; dayIndex += 1) {
-      const day = this.configuredDays[dayIndex];
-      if (!day) {
-        continue;
-      }
-
-      for (let rowIndex = 0; rowIndex < day.rows.length; rowIndex += 1) {
-        const row = day.rows[rowIndex];
-
-        if (row.ejercicioId !== this.customExerciseOptionId) {
-          continue;
-        }
-
-        if (!row.muscleGroupId) {
-          throw new Error(`Debes seleccionar un grupo muscular en Dia ${dayIndex + 1}, fila ${rowIndex + 1}.`);
-        }
-
-        const normalizedName = this.normalizeExerciseName(row.customExerciseName);
-        if (!normalizedName) {
-          throw new Error(`Debes escribir el nombre del ejercicio en Dia ${dayIndex + 1}, fila ${rowIndex + 1}.`);
-        }
-
-        if (this.exerciseExists(normalizedName)) {
-          throw new Error(`El ejercicio "${normalizedName}" ya existe y no se puede volver a crear.`);
-        }
-
-        const created = await firstValueFrom(
-          this.planEntrenamientoApiService.createEjercicio({
-            nombre: normalizedName,
-            grupoMuscularId: row.muscleGroupId,
-          }),
-        );
-
-        this.appendExerciseToCatalog(created);
-        row.ejercicioId = created.id;
-        row.customExerciseName = created.nombre;
-      }
-    }
-  }
-
-  private appendExerciseToCatalog(created: CreateEjercicioResponse): void {
-    this.muscleGroups = this.muscleGroups.map((group) => {
-      if (group.id !== created.grupoMuscularId) {
-        return group;
-      }
-
-      const alreadyExists = (group.ejercicios ?? []).some((exercise) => exercise.id === created.id);
-      if (alreadyExists) {
-        return group;
-      }
-
-      const ejercicios = [...(group.ejercicios ?? []), { id: created.id, nombre: created.nombre }]
-        .sort((a, b) => a.nombre.localeCompare(b.nombre));
-
-      return {
-        ...group,
-        ejercicios,
-      };
-    });
+    return { muscleGroupId: null, ejercicioId: null, repeticiones: '' };
   }
 
   private loadCatalogo(): void {
@@ -349,12 +223,21 @@ export class CrearPlan implements OnInit, OnDestroy {
         });
       });
 
+      const descripcionesDias: Array<string | null> = Array.from({ length: 7 }, (_, i) => {
+        if (i >= this.frequencyDays) {
+          return null;
+        }
+        const desc = this.configuredDays[i]?.descripcion?.trim() ?? '';
+        return desc || null;
+      });
+
       return {
         nombre,
         descripcion: this.description.trim() || undefined,
         cantidadDias: this.frequencyDays,
         ejercicios,
         repeticiones,
+        descripcionesDias,
       };
     } catch (error) {
       this.showStatus(

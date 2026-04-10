@@ -25,7 +25,8 @@ export interface CurrentMonthPaymentResponse {
 export interface Membresia {
   id: number;
   nombre: string;
-  dias: number;
+  descripcion?: string | null;
+  dias: string;
   costo: number;
   tipoMembresia?: TipoMembresia;
 }
@@ -42,6 +43,15 @@ export interface UserMembresiaResponse {
   createdAt: string;
   membresia?: Membresia;
   estado?: any;
+}
+
+export interface CurrentMonthReportMetricsResponse {
+  pendingPaymentUsersCurrentMonth: number;
+  membershipsChosenCurrentMonth: Array<{
+    membresiaId: number;
+    membresiaNombre: string;
+    cantidad: number;
+  }>;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -69,6 +79,23 @@ export class MembresiaApiService {
     return this.http.get<UserMembresiaResponse[]>(`${this.apiBaseUrl}/membresia/mis-membresias`);
   }
 
+  getPaymentsByDateRange(desde: string, hasta: string): Observable<{
+    id: number;
+    userId: number | null;
+    createdAt: string;
+    membresiaId: number | null;
+    membresiaNombre: string;
+    tipoMembresiaNombre: string | null;
+    costo: number | null;
+  }[]> {
+    const params = `desde=${encodeURIComponent(desde)}&hasta=${encodeURIComponent(hasta)}`;
+    return this.http.get<any[]>(`${this.apiBaseUrl}/membresia/pagos/rango?${params}`);
+  }
+
+  getCurrentMonthReportMetrics(): Observable<CurrentMonthReportMetricsResponse> {
+    return this.http.get<CurrentMonthReportMetricsResponse>(`${this.apiBaseUrl}/membresia/reporte/metricas-mes-actual`);
+  }
+
   getAllMemberships(): Observable<Membresia[]> {
     return this.http.get<Membresia[]>(`${this.apiBaseUrl}/membresia`);
   }
@@ -81,11 +108,23 @@ export class MembresiaApiService {
     return this.http.post<UserMembresiaResponse>(`${this.apiBaseUrl}/membresia/asignar`, { membresiaId });
   }
 
-  createMembership(payload: { nombre: string; dias: number; costo: number; tipoMembresiaId: number }): Observable<Membresia> {
+  createMembership(payload: {
+    nombre: string;
+    descripcion?: string;
+    dias: string;
+    costo: number;
+    tipoMembresiaId: number;
+  }): Observable<Membresia> {
     return this.http.post<Membresia>(`${this.apiBaseUrl}/membresia`, payload);
   }
 
-  updateMembership(id: number, payload: { nombre: string; dias: number; costo: number; tipoMembresiaId: number }): Observable<Membresia> {
+  updateMembership(id: number, payload: {
+    nombre: string;
+    descripcion?: string;
+    dias: string;
+    costo: number;
+    tipoMembresiaId: number;
+  }): Observable<Membresia> {
     return this.http.patch<Membresia>(`${this.apiBaseUrl}/membresia/${id}`, payload);
   }
 

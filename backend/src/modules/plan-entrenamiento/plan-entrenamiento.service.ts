@@ -1,4 +1,4 @@
-﻿import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+﻿import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePlanEntrenamientoDto } from './dto/create-plan-entrenamiento.dto';
@@ -12,6 +12,33 @@ import { CreateEjercicioDto } from './dto/create-ejercicio.dto';
 @Injectable()
 export class PlanEntrenamientoService {
   private static readonly DIAS_SEMANA = 7;
+  private readonly logger = new Logger(PlanEntrenamientoService.name);
+
+  private isTransientDbConnectionError(error: unknown): boolean {
+    const message = error instanceof Error ? error.message : String(error ?? '');
+    return (
+      message.includes('Connection terminated unexpectedly') ||
+      message.includes('ECONNRESET') ||
+      message.includes('ETIMEDOUT') ||
+      message.includes('57P01')
+    );
+  }
+
+  private async executeWithDbRetry<T>(operationName: string, operation: () => Promise<T>): Promise<T> {
+    try {
+      return await operation();
+    } catch (error) {
+      if (!this.isTransientDbConnectionError(error)) {
+        throw error;
+      }
+
+      this.logger.warn(
+        `[${operationName}] Error transitorio de conexion con DB. Reintentando una vez. Detalle: ${error instanceof Error ? error.message : String(error)}`,
+      );
+
+      return operation();
+    }
+  }
 
   private normalizeExerciseName(nombre: string): string {
     return String(nombre ?? '')
@@ -33,6 +60,20 @@ export class PlanEntrenamientoService {
 
   private async deletePlanIfUnused(planId: number | null): Promise<void> {
     if (!planId) {
+      return;
+    }
+
+    const plan = await this.planEntrenamientoRepository.findOne({
+      where: { id: planId },
+      select: { id: true, tipo: true },
+    });
+
+    if (!plan) {
+      return;
+    }
+
+    // Los planes predeterminados no se eliminan nunca.
+    if (plan.tipo !== 'editado') {
       return;
     }
 
@@ -156,8 +197,18 @@ export class PlanEntrenamientoService {
       (dia): dia is string[] => Array.isArray(dia) && dia.length > 0,
     );
 
+    const descripcionesDiasNormalizadas = Array.isArray(plan.descripcionesDias)
+      ? plan.descripcionesDias
+      : null;
+
+    this.logger.debug(
+      `[formatPlanForResponse] planId=${plan.id} rawDescripcionesDias=${JSON.stringify(plan.descripcionesDias)} normalized=${JSON.stringify(descripcionesDiasNormalizadas)}`,
+    );
+
     return {
       ...plan,
+      descripcionesDias: descripcionesDiasNormalizadas,
+      descripciones_dias: descripcionesDiasNormalizadas,
       ejerciciosVisibles,
       repeticionesVisibles,
     };
@@ -182,6 +233,7 @@ export class PlanEntrenamientoService {
       cantidadDias: createPlanEntrenamientoDto.cantidadDias,
       ejercicios,
       repeticiones,
+      descripcionesDias: createPlanEntrenamientoDto.descripcionesDias ?? null,
     };
 
     const insertResult = await this.planEntrenamientoRepository.insert(insertPayload);
@@ -222,16 +274,48 @@ export class PlanEntrenamientoService {
 
   async findGruposMusculares() {
     return this.grupoMuscularRepository.find({
-      relations: {
-        ejercicios: true,
+      relations: ['ejercicios'],
+      order: {
+        nombre: 'ASC',
+      },
+    });
+  }
+
+  async findGruposMuscularesResumen() {
+    return this.grupoMuscularRepository.find({
+      select: {
+        id: true,
+        nombre: true,
       },
       order: {
         nombre: 'ASC',
-        ejercicios: {
-          nombre: 'ASC',
-        },
       },
     });
+  }
+
+  async findEjerciciosByGrupoMuscularId(grupoMuscularId: number) {
+    const normalizedGroupId = Number(grupoMuscularId);
+
+    if (!Number.isInteger(normalizedGroupId) || normalizedGroupId <= 0) {
+      throw new BadRequestException('El id del grupo muscular debe ser un entero mayor a 0.');
+    }
+
+    const grupoMuscular = await this.grupoMuscularRepository.findOne({
+      where: { id: normalizedGroupId },
+      select: { id: true },
+    });
+
+    if (!grupoMuscular) {
+      throw new NotFoundException(`No se encontro el grupo muscular con id ${normalizedGroupId}`);
+    }
+
+    return this.ejercicioRepository
+      .createQueryBuilder('ejercicio')
+      .innerJoin('ejercicio.grupoMuscular', 'grupo')
+      .select(['ejercicio.id AS id', 'ejercicio.nombre AS nombre'])
+      .where('grupo.id = :grupoId', { grupoId: normalizedGroupId })
+      .orderBy('ejercicio.nombre', 'ASC')
+      .getRawMany<{ id: number; nombre: string }>();
   }
 
   async findEjercicioById(id: number) {
@@ -290,8 +374,53 @@ export class PlanEntrenamientoService {
     };
   }
 
+  async createGrupoMuscular(createGrupoMuscularDto: { nombre: string }) {
+    const normalizedNombre = this.normalizeExerciseName(createGrupoMuscularDto.nombre);
+
+    if (!normalizedNombre) {
+      throw new BadRequestException('El nombre del grupo muscular es obligatorio.');
+    }
+
+    const gruposExistentes = await this.grupoMuscularRepository.find({
+      select: {
+        id: true,
+        nombre: true,
+      },
+    });
+
+    const duplicate = gruposExistentes.find(
+      (grupo) => this.normalizeExerciseName(grupo.nombre) === normalizedNombre,
+    );
+
+    if (duplicate) {
+      throw new ConflictException('El grupo muscular ya existe y no se puede volver a crear.');
+    }
+
+    const created = this.grupoMuscularRepository.create({
+      nombre: normalizedNombre,
+    });
+
+    const saved = await this.grupoMuscularRepository.save(created);
+
+    return {
+      id: saved.id,
+      nombre: saved.nombre,
+      message: 'Grupo muscular creado correctamente.',
+    };
+  }
+
   async findGrupoMuscularById(id: number) {
-    const grupoMuscular = await this.grupoMuscularRepository.findOne({ where: { id } });
+    const grupoMuscular = await this.grupoMuscularRepository.findOne({
+      where: { id },
+      relations: {
+        ejercicios: true,
+      },
+      order: {
+        ejercicios: {
+          nombre: 'ASC',
+        },
+      },
+    });
 
     if (!grupoMuscular) {
       throw new NotFoundException(`No se encontro el grupo muscular con id ${id}`);
@@ -325,26 +454,28 @@ export class PlanEntrenamientoService {
   }
 
   async assignPlanToUser(userId: number, planId: number): Promise<{ message: string }> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user) {
-      throw new NotFoundException(`No se encontro el usuario con id ${userId}`);
-    }
+    return this.executeWithDbRetry('assignPlanToUser', async () => {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) {
+        throw new NotFoundException(`No se encontro el usuario con id ${userId}`);
+      }
 
-    const previousPlanId = user.planEntrenamientoId;
+      const previousPlanId = user.planEntrenamientoId;
 
-    const planExists = await this.planEntrenamientoRepository.existsBy({ id: planId });
-    if (!planExists) {
-      throw new NotFoundException(`No se encontro el plan de entrenamiento con id ${planId}`);
-    }
+      const planExists = await this.planEntrenamientoRepository.existsBy({ id: planId });
+      if (!planExists) {
+        throw new NotFoundException(`No se encontro el plan de entrenamiento con id ${planId}`);
+      }
 
-    user.planEntrenamientoId = planId;
-    await this.userRepository.save(user);
+      user.planEntrenamientoId = planId;
+      await this.userRepository.save(user);
 
-    if (previousPlanId !== planId) {
-      await this.deletePlanIfUnused(previousPlanId);
-    }
+      if (previousPlanId !== planId) {
+        await this.deletePlanIfUnused(previousPlanId);
+      }
 
-    return { message: 'Plan asignado correctamente' };
+      return { message: 'Plan asignado correctamente' };
+    });
   }
 
   async updatePlanForUser(userId: number, createPlanEntrenamientoDto: CreatePlanEntrenamientoDto) {
@@ -373,6 +504,7 @@ export class PlanEntrenamientoService {
       cantidadDias: createPlanEntrenamientoDto.cantidadDias,
       ejercicios,
       repeticiones,
+      descripcionesDias: createPlanEntrenamientoDto.descripcionesDias ?? null,
     };
 
     const insertResult = await this.planEntrenamientoRepository.insert(insertPayload);
@@ -420,6 +552,10 @@ export class PlanEntrenamientoService {
       updatePlanEntrenamientoDto.descripcion !== undefined
         ? updatePlanEntrenamientoDto.descripcion?.trim() || null
         : plan.descripcion;
+    plan.descripcionesDias =
+      updatePlanEntrenamientoDto.descripcionesDias !== undefined
+        ? updatePlanEntrenamientoDto.descripcionesDias
+        : plan.descripcionesDias;
     plan.cantidadDias = cantidadDias;
     plan.ejercicios = ejercicios;
     plan.repeticiones = repeticiones;
@@ -433,6 +569,18 @@ export class PlanEntrenamientoService {
 
     if (!plan) {
       throw new NotFoundException(`No se encontro el plan de entrenamiento con id ${id}`);
+    }
+
+    if (plan.tipo === 'predeterminado') {
+      throw new BadRequestException('Los planes predeterminados no se pueden eliminar.');
+    }
+
+    const usersUsingPlan = await this.userRepository.count({
+      where: { planEntrenamientoId: id },
+    });
+
+    if (usersUsingPlan > 0) {
+      throw new BadRequestException('No se puede eliminar un plan editado que esta asignado a usuarios.');
     }
 
     await this.planEntrenamientoRepository.delete(id);

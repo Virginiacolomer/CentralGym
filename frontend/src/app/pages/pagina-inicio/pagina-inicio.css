@@ -224,19 +224,35 @@
 }
 
 /* Boton CTA principal debajo de las tarjetas. */
+.cta-group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.8rem;
+	max-width: 100%;
+}
+
 .cta {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	border-radius: 999px;
 	padding: 0.93rem 1.5rem;
-	background: linear-gradient(120deg, #11cc4c, #8ee45d);
-	color: #06160a;
 	font-weight: 700;
 	text-decoration: none;
 	transition: transform 170ms ease, box-shadow 170ms ease;
 	max-width: 100%;
 	box-sizing: border-box;
+}
+
+.cta-primary {
+	background: linear-gradient(120deg, #11cc4c, #8ee45d);
+	color: #06160a;
+}
+
+.cta-secondary {
+	background: rgba(217, 218, 221, 0.12);
+	border: 1px solid rgba(217, 218, 221, 0.28);
+	color: #eef2f4;
 }
 
 /* Hover del CTA para dar sensacion de elevacion. */

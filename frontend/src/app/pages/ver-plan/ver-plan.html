@@ -5,6 +5,10 @@
       <div class="plan-shell">
         <h1>Plan {{ selectedUserName }}</h1>
 
+        @if (currentPlan?.nombre) {
+          <p class="plan-name-caption">Nombre del plan: {{ currentPlan?.nombre }}</p>
+        }
+
         @if (statusMessage) {
           <p class="status-message" role="status" aria-live="polite">{{ statusMessage }}</p>
         }
@@ -22,7 +26,12 @@
                 [attr.aria-expanded]="day.expanded"
                 (click)="toggleDay(index)"
               >
-                <span class="day-label">{{ day.label }}</span>
+                <span class="day-label">
+                  {{ day.label }}
+                  @if (day.description) {
+                    <span class="day-description-inline"> - {{ day.description }}</span>
+                  }
+                </span>
                 <span class="day-arrow" [class.day-arrow-open]="day.expanded" aria-hidden="true"></span>
               </button>
 

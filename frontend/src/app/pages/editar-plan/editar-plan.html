@@ -5,6 +5,10 @@
       <div class="plan-shell">
         <h1>Plan {{ selectedUserName }}</h1>
 
+        @if (planName) {
+          <p class="plan-name-caption">Nombre del plan: {{ planName }}</p>
+        }
+
         @if (statusMessage) {
           <p class="status-message" role="status" aria-live="polite">{{ statusMessage }}</p>
         }

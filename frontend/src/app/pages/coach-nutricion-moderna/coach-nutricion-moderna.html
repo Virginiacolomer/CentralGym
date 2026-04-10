@@ -1,0 +1,39 @@
+<app-page-bg>
+  <main class="page-with-header">
+    <section class="page-shell">
+      <app-page-header [showBack]="true" backHref="/membresias"></app-page-header>
+
+      <article class="coach-card" aria-labelledby="coach-title">
+        <h1 id="coach-title">Coach en Nutricion Moderna</h1>
+
+        <section class="plans-panel" aria-labelledby="nutrition-memberships-title">
+          <h2 id="nutrition-memberships-title" class="visually-hidden">Membresias nutricionales</h2>
+
+          @if (isLoading) {
+            <div class="plan-block plan-block--loading">Cargando membresias de nutricion...</div>
+          } @else if (memberships.length === 0) {
+            <div class="plan-block plan-block--loading">No hay membresias de nutricion disponibles en este momento.</div>
+          } @else {
+            <div class="plans-grid">
+              @for (membership of memberships; track membership.id) {
+                <article class="plan-block">
+                  <h3>{{ membership.nombre }}</h3>
+                  <p>{{ getMembershipDescription(membership) }}</p>
+                  <strong>{{ formatAmount(membership.costo) }}</strong>
+                  <a
+                    class="whatsapp-btn"
+                    [href]="getWhatsAppHref(membership)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Consultar por WhatsApp
+                  </a>
+                </article>
+              }
+            </div>
+          }
+        </section>
+      </article>
+    </section>
+  </main>
+</app-page-bg>

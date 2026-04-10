@@ -26,7 +26,7 @@
                 class="membership-option"
               >
                 <div class="membership-title">{{ membership.nombre }}</div>
-                <div class="membership-days">{{ membership.dias }} dias por semana</div>
+                <div class="membership-days">{{ membership.dias }}</div>
                 <div class="membership-price">{{ formatAmount(membership.costo) }}</div>
                 <div class="membership-cta">
                   {{ isSelecting ? 'Procesando...' : 'Seleccionar' }}
@@ -49,7 +49,7 @@
               <div class="summary-grid">
                 <article class="summary-item">
                   <span class="summary-label">Frecuencia</span>
-                  <strong>{{ getMembershipDays(membership) }} dias</strong>
+                  <strong>{{ getMembershipDays(membership) }}</strong>
                 </article>
                 <article class="summary-item">
                   <span class="summary-label">Cuota</span>

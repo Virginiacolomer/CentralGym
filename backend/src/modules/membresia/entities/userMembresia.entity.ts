@@ -1,5 +1,5 @@
 import { Entity, ManyToOne, JoinColumn, PrimaryGeneratedColumn, CreateDateColumn, Column, OneToMany, Index } from 'typeorm';
-import { User } from 'src/modules/users/entities/user.entity';
+import { User } from '../../users/entities/user.entity';
 import { Membresia } from './membresia.entity';
 import { EstadoUserMembresia } from './estadoUserMembresia.entity';
 import { Pago } from './pago.entity';
@@ -8,32 +8,32 @@ import { Pago } from './pago.entity';
 @Index('uq_user_membresia_user_membresia', ['userId', 'membresiaId'], { unique: true })
 export class UserMembresia {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ name: 'user_id', type: 'int' })
-  userId: number;
+  userId!: number;
 
   @Column({ name: 'membresia_id', type: 'int' })
-  membresiaId: number;
+  membresiaId!: number;
 
   @Column({ name: 'estado_id', type: 'int', nullable: true })
-  estadoId: number;
+  estadoId!: number;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
-  createdAt: Date;
+  createdAt!: Date;
 
-  @ManyToOne(() => User, user => user.userMembresias, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (user: User) => user.userMembresias, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user!: User;
 
-  @ManyToOne(() => Membresia, membresia => membresia.userMembresias, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Membresia, (membresia: Membresia) => membresia.userMembresias, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'membresia_id' })
-  membresia: Membresia;
+  membresia!: Membresia;
 
-  @ManyToOne(() => EstadoUserMembresia, estado => estado.userMembresias)
+  @ManyToOne(() => EstadoUserMembresia, (estado: EstadoUserMembresia) => estado.userMembresias)
   @JoinColumn({ name: 'estado_id' })
-  estado: EstadoUserMembresia;
+  estado!: EstadoUserMembresia;
 
-  @OneToMany(() => Pago, pago => pago.userMembresia)
-  pagos: Pago[];
+  @OneToMany(() => Pago, (pago: Pago) => pago.userMembresia)
+  pagos!: Pago[];
 }

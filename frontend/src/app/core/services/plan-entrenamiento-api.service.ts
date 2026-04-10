@@ -1,6 +1,7 @@
 ﻿import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { timeout } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 export interface CatalogoEjercicio {
@@ -14,17 +15,33 @@ export interface CatalogoGrupoMuscular {
   ejercicios: CatalogoEjercicio[];
 }
 
+export interface CatalogoGrupoMuscularResumen {
+  id: number;
+  nombre: string;
+}
+
 export interface CreatePlanEntrenamientoRequest {
   nombre: string;
   descripcion?: string;
   cantidadDias: number;
   ejercicios: Array<number[] | null>;
   repeticiones: Array<string[] | null>;
+  descripcionesDias?: Array<string | null>;
 }
 
 export interface CreateEjercicioRequest {
   nombre: string;
   grupoMuscularId: number;
+}
+
+export interface CreateGrupoMuscularRequest {
+  nombre: string;
+}
+
+export interface CreateGrupoMuscularResponse {
+  id: number;
+  nombre: string;
+  message: string;
 }
 
 export interface CreateEjercicioResponse {
@@ -38,6 +55,8 @@ export interface PlanEntrenamientoResponse {
   id: number;
   nombre: string;
   descripcion?: string | null;
+  descripcionesDias?: Array<string | null>;
+  descripciones_dias?: Array<string | null>;
   tipo?: 'predeterminado' | 'editado';
   cantidadDias: number;
   ejercicios: Array<number[] | null>;
@@ -64,15 +83,42 @@ export class PlanEntrenamientoApiService {
   private readonly apiBaseUrl = environment.apiBaseUrl.replace(/\/+$/, '');
 
   getCatalogoGruposMusculares(): Observable<CatalogoGrupoMuscular[]> {
-    return this.http.get<CatalogoGrupoMuscular[]>(`${this.apiBaseUrl}/plan-entrenamiento/grupos-musculares`);
+    return this.http.get<CatalogoGrupoMuscular[]>(
+      `${this.apiBaseUrl}/plan-entrenamiento/grupos-musculares?_t=${Date.now()}`,
+    );
+  }
+
+  getCatalogoGruposMuscularesResumen(): Observable<CatalogoGrupoMuscularResumen[]> {
+    return this.http.get<CatalogoGrupoMuscularResumen[]>(
+      `${this.apiBaseUrl}/plan-entrenamiento/grupos-musculares-resumen?_t=${Date.now()}`,
+    );
+  }
+
+  getGrupoMuscularById(grupoId: number): Observable<CatalogoGrupoMuscular> {
+    return this.http.get<CatalogoGrupoMuscular>(
+      `${this.apiBaseUrl}/plan-entrenamiento/grupos-musculares/${grupoId}?_t=${Date.now()}`,
+    );
+  }
+
+  getEjerciciosByGrupoMuscularId(grupoId: number): Observable<CatalogoEjercicio[]> {
+    return this.http.get<CatalogoEjercicio[]>(
+      `${this.apiBaseUrl}/plan-entrenamiento/grupos-musculares/${grupoId}/ejercicios?_t=${Date.now()}`,
+    );
   }
 
   createPlan(payload: CreatePlanEntrenamientoRequest): Observable<unknown> {
-    return this.http.post(`${this.apiBaseUrl}/plan-entrenamiento`, payload);
+    return this.http.post(`${this.apiBaseUrl}/plan-entrenamiento`, payload).pipe(timeout(35000));
   }
 
   createEjercicio(payload: CreateEjercicioRequest): Observable<CreateEjercicioResponse> {
-    return this.http.post<CreateEjercicioResponse>(`${this.apiBaseUrl}/plan-entrenamiento/ejercicios`, payload);
+    return this.http.post<CreateEjercicioResponse>(`${this.apiBaseUrl}/plan-entrenamiento/ejercicios`, payload).pipe(timeout(10000));
+  }
+
+  createGrupoMuscular(payload: CreateGrupoMuscularRequest): Observable<CreateGrupoMuscularResponse> {
+    return this.http.post<CreateGrupoMuscularResponse>(
+      `${this.apiBaseUrl}/plan-entrenamiento/grupos-musculares`,
+      payload,
+    ).pipe(timeout(10000));
   }
 
   getMyPlan(): Observable<UserPlanResponse> {
@@ -91,7 +137,7 @@ export class PlanEntrenamientoApiService {
     return this.http.patch<{ message: string }>(
       `${this.apiBaseUrl}/plan-entrenamiento/usuario/${userId}/asignar/${planId}`,
       {},
-    );
+    ).pipe(timeout(10000));
   }
 
   updatePlanForUser(
@@ -101,6 +147,6 @@ export class PlanEntrenamientoApiService {
     return this.http.patch<UserEditedPlanResponse>(
       `${this.apiBaseUrl}/plan-entrenamiento/usuario/${userId}/editar`,
       payload,
-    );
+    ).pipe(timeout(15000));
   }
 }

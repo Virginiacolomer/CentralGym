@@ -200,7 +200,7 @@ export class UsersService {
         membresiaId: item.membresiaId,
         tipoMembresiaId: item.membresia?.tipoMembresia?.id ?? null,
         nombre: item.membresia?.nombre ?? 'Sin membresia',
-        dias: item.membresia?.dias ?? 0,
+        dias: item.membresia?.dias ?? '',
         estadoPago: String(item.estado?.nombre ?? '').toUpperCase() === 'AL_DIA' ? 'alDia' : 'cuotaPendiente',
       }));
 
@@ -214,7 +214,7 @@ export class UsersService {
         membresiaId: membership?.id ?? null,
         tipoMembresiaId: membership?.tipoMembresia?.id ?? null,
         membresia: membership?.nombre ?? 'Sin membresia',
-        frecuenciaDias: membership?.dias ?? 0,
+        frecuenciaDias: membership?.dias ?? '',
         estadoPago: isUpToDate ? 'alDia' : 'cuotaPendiente',
         membresias: memberships,
       };

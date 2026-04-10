@@ -36,4 +36,10 @@ ejercicios: Array<number[] | null>;
 @ArrayMinSize(7, { message: 'El arreglo de repeticiones debe tener 7 posiciones.' })
 @ArrayMaxSize(7, { message: 'El arreglo de repeticiones debe tener 7 posiciones.' })
 repeticiones: Array<string[] | null>;
+
+@IsOptional()
+@IsArray({ message: 'Las descripciones de dias deben enviarse como arreglo.' })
+@ArrayMinSize(7, { message: 'El arreglo de descripciones debe tener 7 posiciones.' })
+@ArrayMaxSize(7, { message: 'El arreglo de descripciones debe tener 7 posiciones.' })
+descripcionesDias?: Array<string | null>;
 }

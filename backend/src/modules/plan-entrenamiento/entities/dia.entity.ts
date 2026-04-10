@@ -5,17 +5,17 @@ import { PlanEntrenamiento } from './plan-entrenamiento.entity';
 @Index('uq_plan_dia_numero', ['planEntrenamiento', 'numeroDia'], { unique: true })
 export class Dia {
     @PrimaryGeneratedColumn({ type: 'bigint' })
-    id: number;
+    id!: number;
 
     @Column({ name: 'planEntrenamientoId', type: 'bigint' })
-    planEntrenamientoId: number;
+    planEntrenamientoId!: number;
 
     @ManyToOne(() => PlanEntrenamiento)
     @JoinColumn({ name: 'planEntrenamientoId' })
-    planEntrenamiento: PlanEntrenamiento;
+    planEntrenamiento!: PlanEntrenamiento;
 
     @Column({ name: 'numero_dia', type: 'smallint' })
-    numeroDia: number;
+    numeroDia!: number;
 
     @Column({ nullable: true, length: 80 })
     nombre?: string;

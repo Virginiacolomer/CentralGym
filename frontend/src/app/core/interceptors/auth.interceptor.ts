@@ -9,6 +9,8 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const router = inject(Router);
   const token = authStateService.getToken();
   const isLoginRequest = /\/auth\/login(?:\?|$)/.test(request.url);
+  const isPublicMembershipCatalogRequest =
+    request.method === 'GET' && /\/membresia(?:\/tipos)?(?:\?|$)/.test(request.url);
 
   const requestWithAuth = token
     ? request.clone({
@@ -26,12 +28,20 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
           return throwError(() => error);
         }
 
+        if (isPublicMembershipCatalogRequest) {
+          return throwError(() => error);
+        }
+
         window.alert('Advertencia: debes iniciar sesion para realizar esta accion.');
         authStateService.logout();
         router.navigate(['/login']);
       } else if (error?.status === 403) {
         if (isLoginRequest) {
           // En login dejamos que el componente muestre el mensaje especifico del backend.
+          return throwError(() => error);
+        }
+
+        if (isPublicMembershipCatalogRequest) {
           return throwError(() => error);
         }
 

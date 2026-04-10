@@ -55,6 +55,13 @@
                     <span class="day-arrow" [class.day-arrow-open]="day.expanded" aria-hidden="true"></span>
                   </button>
 
+                  <input
+                    type="text"
+                    class="day-description-input"
+                    placeholder="Descripción del día (opcional)"
+                    [(ngModel)]="day.descripcion"
+                  />
+
                   @if (day.expanded) {
                     <div class="day-fields">
                       @for (row of day.rows; track $index; let rowIndex = $index) {
@@ -83,21 +90,8 @@
                               @for (ejercicio of getExercisesForGroup(row.muscleGroupId); track ejercicio.id) {
                                 <option [ngValue]="ejercicio.id">{{ ejercicio.nombre }}</option>
                               }
-                              <option [ngValue]="-1">OTRO (escribir nuevo)</option>
                             </select>
                           </label>
-
-                          @if (isCustomExerciseSelected(row)) {
-                            <label>
-                              Nuevo ejercicio
-                              <input
-                                type="text"
-                                placeholder="Ej: PRESS MILITAR"
-                                [ngModel]="row.customExerciseName"
-                                (ngModelChange)="onCustomExerciseInput(index, rowIndex, $event)"
-                              />
-                            </label>
-                          }
 
                           <label>
                             Repeticiones

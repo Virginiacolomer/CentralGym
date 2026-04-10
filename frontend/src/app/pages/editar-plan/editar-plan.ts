@@ -32,6 +32,7 @@ export class EditarPlan implements OnInit {
 
   selectedUserName = 'Usuario';
   selectedUserId: number | null = null;
+  planName = '';
   isLoading = false;
   statusMessage = '';
 
@@ -89,16 +90,19 @@ export class EditarPlan implements OnInit {
         next: (response) => {
           if (!response.plan) {
             this.days = [];
+            this.planName = '';
             this.statusMessage = 'Este usuario no tiene un plan de entrenamiento asignado.';
             this.cdr.detectChanges();
             return;
           }
 
+          this.planName = response.plan.nombre;
           this.days = this.mapPlanToEditableDays(response.plan);
           this.cdr.detectChanges();
         },
         error: () => {
           this.days = [];
+          this.planName = '';
           this.statusMessage = 'No se pudo cargar el plan del usuario.';
           this.cdr.detectChanges();
         },

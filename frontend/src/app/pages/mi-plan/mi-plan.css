@@ -67,13 +67,14 @@
 }
 
 .plan-summary h2 {
-	margin: 0 0 0.45rem;
+	margin: 0 0 0.55rem;
 	font-family: 'Teko', sans-serif;
-	font-size: clamp(2rem, 5vw, 2.6rem);
-	line-height: 0.95;
-	letter-spacing: 0.03em;
+	font-size: clamp(2.4rem, 6.2vw, 3.3rem);
+	line-height: 0.9;
+	letter-spacing: 0.035em;
 	text-transform: uppercase;
 	color: #39f45a;
+	text-shadow: 0 0 18px rgba(57, 244, 90, 0.18);
 }
 
 .plan-summary p {
@@ -113,6 +114,16 @@
 
 .day-label {
 	line-height: 0.9;
+}
+
+.day-description-inline {
+	font-family: 'Sora', sans-serif;
+	font-size: 0.9rem;
+	font-weight: 500;
+	text-transform: none;
+	letter-spacing: 0;
+	color: #d7e0e4;
+	line-height: 1.35;
 }
 
 .day-arrow {

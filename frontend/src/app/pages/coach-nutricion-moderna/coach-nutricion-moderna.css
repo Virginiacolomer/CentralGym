@@ -1,0 +1,159 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Teko:wght@500;700&display=swap');
+
+:host {
+  display: block;
+}
+
+.page-with-header {
+  min-height: 100svh;
+  color: #e9edf0;
+  font-family: 'Sora', sans-serif;
+}
+
+.page-shell {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 1.1rem max(1.2rem, env(safe-area-inset-right)) calc(2rem + env(safe-area-inset-bottom)) max(1.2rem, env(safe-area-inset-left));
+}
+
+.coach-card {
+  margin-top: 0.9rem;
+  padding: clamp(1rem, 2.5vw, 1.8rem);
+  border-radius: 28px;
+  background:
+    linear-gradient(145deg, rgba(57, 244, 90, 0.18), rgba(57, 244, 90, 0) 35%),
+    rgba(10, 14, 16, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.coach-card h1 {
+  margin: 0 0 0.7rem;
+  font-family: 'Teko', sans-serif;
+  font-size: clamp(3rem, 8vw, 5rem);
+  line-height: 0.83;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #39f45a;
+}
+
+.lead {
+  margin: 0 0 1rem;
+  font-size: clamp(1rem, 2.6vw, 1.25rem);
+  line-height: 1.45;
+  color: #f2f6f8;
+}
+
+.benefits {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.52rem;
+  color: #d4dde2;
+  font-size: 0.97rem;
+  line-height: 1.5;
+}
+
+.cta-text {
+  margin: 1.15rem 0 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  background: rgba(57, 244, 90, 0.14);
+  color: #ecfff0;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.plans-panel {
+  margin-top: 1.2rem;
+}
+
+.plans-panel h2 {
+  margin: 0 0 0.7rem;
+  font-family: 'Teko', sans-serif;
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  line-height: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #e8ffec;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.8rem;
+}
+
+.plan-block {
+  border-radius: 16px;
+  padding: 0.8rem 0.9rem;
+  background: linear-gradient(170deg, rgba(18, 24, 27, 0.86), rgba(15, 20, 22, 0.98));
+  border: 1px solid rgba(121, 255, 146, 0.25);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 20px rgba(0, 0, 0, 0.24);
+}
+
+.plan-block h3 {
+  margin: 0;
+  font-family: 'Teko', sans-serif;
+  font-size: clamp(1.35rem, 3.4vw, 1.9rem);
+  line-height: 0.9;
+  color: #effaf2;
+  letter-spacing: 0.015em;
+}
+
+.plan-block p {
+  margin: 0.5rem 0;
+  color: #d4dde2;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  white-space: pre-line;
+}
+
+.plan-block strong {
+  display: inline-block;
+  color: #b8ffbe;
+  font-family: 'Teko', sans-serif;
+  font-size: 1.7rem;
+  line-height: 0.9;
+}
+
+.whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.65rem;
+  padding: 0.48rem 0.78rem;
+  border-radius: 999px;
+  background: linear-gradient(160deg, #2fd86b, #1ebf5c);
+  color: #08200f;
+  font-weight: 700;
+  font-size: 0.84rem;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.whatsapp-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+.whatsapp-btn:active {
+  transform: translateY(0);
+}
+
+.plan-block--loading {
+  color: #d7dfe4;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -15,6 +15,7 @@
               <thead>
                 <tr>
                   <th>Membresia</th>
+                  <th>Descripcion</th>
                   <th>Tipo</th>
                   <th>Costo</th>
                   <th>Frecuencia</th>
@@ -24,11 +25,11 @@
               <tbody>
                 @if (isLoading) {
                   <tr>
-                    <td class="empty-state" colspan="5">Cargando membresias...</td>
+                    <td class="empty-state" colspan="6">Cargando membresias...</td>
                   </tr>
                 } @else if (memberships.length === 0) {
                   <tr>
-                    <td class="empty-state" colspan="5">No hay membresias para mostrar.</td>
+                    <td class="empty-state" colspan="6">No hay membresias para mostrar.</td>
                   </tr>
                 } @else {
                   @for (membership of memberships; track trackMembership($index, membership)) {
@@ -45,6 +46,49 @@
                         } @else {
                           <span>{{ membership.name }}</span>
                         }
+                      </td>
+                      <td>
+                        <div class="description-cell">
+                          @if (membership.isEditing) {
+                            <textarea
+                              class="description-input"
+                              [(ngModel)]="membership.draftDescription"
+                              (input)="autoResizeDescription($event)"
+                              placeholder="Descripcion de la membresia"
+                              aria-label="Editar descripcion de membresia"
+                              rows="3"
+                            ></textarea>
+                          } @else {
+                            <span>{{ membership.description || '-' }}</span>
+                          }
+
+                          @if (!membership.isEditing) {
+                            <button
+                              type="button"
+                              class="icon-button"
+                              aria-label="Editar descripcion de membresia"
+                              title="Editar descripcion"
+                              (click)="startEditing(membership.id!)"
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path
+                                  d="M4 20L8.2 18.8L18.3 8.7C19.2 7.8 19.2 6.3 18.3 5.4L17.6 4.7C16.7 3.8 15.2 3.8 14.3 4.7L4.2 14.8L3 19L4 20Z"
+                                  stroke="currentColor"
+                                  stroke-width="1.8"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                                <path
+                                  d="M13.5 5.5L17.5 9.5"
+                                  stroke="currentColor"
+                                  stroke-width="1.8"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                              </svg>
+                            </button>
+                          }
+                        </div>
                       </td>
                       <td>
                         @if (membership.isEditing) {

@@ -19,7 +19,7 @@ export interface UserMembershipSummary {
   membresiaId: number;
   tipoMembresiaId: number | null;
   nombre: string;
-  dias: number;
+  dias: string;
   estadoPago: PaymentState;
 }
 
@@ -33,7 +33,7 @@ export interface ActiveClientUserItem {
   membresiaId: number | null;
   tipoMembresiaId: number | null;
   membresia: string;
-  frecuenciaDias: number;
+  frecuenciaDias: string;
   estadoPago: PaymentState;
   membresias?: UserMembershipSummary[];
 }

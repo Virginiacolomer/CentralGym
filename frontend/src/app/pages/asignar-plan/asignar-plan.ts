@@ -10,7 +10,7 @@ type UserPlanRow = {
   firstName: string;
   lastName: string;
   dni: string;
-  membershipFrequency: number;
+  membershipFrequency: string;
 };
 
 @Component({

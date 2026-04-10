@@ -18,6 +18,7 @@ type ExerciseRow = {
 type TrainingDay = {
   label: string;
   expanded: boolean;
+  description?: string;
   exercises: ExerciseRow[];
 };
 
@@ -92,6 +93,8 @@ export class MiPlan implements OnInit {
           this.buildExerciseNameMap(catalogo);
           this.authenticatedUserId = planData.userId ?? null;
 
+          console.log('[mi-plan] planData.plan (raw):', planData.plan);
+
           if (!planData.plan) {
             this.hasPlan = false;
             this.days = [];
@@ -109,6 +112,7 @@ export class MiPlan implements OnInit {
           this.planName = planData.plan.nombre;
           this.planDescription = planData.plan.descripcion?.trim() ?? '';
           this.days = this.mapPlanToDays(planData.plan);
+          console.log('[mi-plan] days mapeados:', this.days.map((day) => ({ label: day.label, description: day.description })));
           this.hasPlan = true;
           this.errorMessage = '';
           this.cdr.markForCheck();
@@ -125,14 +129,18 @@ export class MiPlan implements OnInit {
   }
 
   private mapPlanToDays(plan: PlanEntrenamientoResponse): TrainingDay[] {
+    const dayDescriptions = this.extractDayDescriptions(plan);
+
     return Array.from({ length: plan.cantidadDias }, (_, dayIndex) => {
       const ejerciciosDia = plan.ejercicios[dayIndex];
       const repeticionesDia = plan.repeticiones[dayIndex];
+      const descripcionDia = dayDescriptions[dayIndex] ?? '';
 
       if (!Array.isArray(ejerciciosDia) || ejerciciosDia.length === 0) {
         return {
           label: `Dia ${dayIndex + 1}`,
           expanded: false,
+          description: descripcionDia || undefined,
           exercises: [],
         };
       }
@@ -140,12 +148,51 @@ export class MiPlan implements OnInit {
       return {
         label: `Dia ${dayIndex + 1}`,
         expanded: false,
+        description: descripcionDia || undefined,
         exercises: ejerciciosDia.map((id, exerciseIndex) => ({
           exercise: this.resolveExerciseName(id),
           workload: Array.isArray(repeticionesDia) ? (repeticionesDia[exerciseIndex] ?? '') : '',
         })),
       };
     });
+  }
+
+  private extractDayDescriptions(plan: PlanEntrenamientoResponse): string[] {
+    const raw = plan as unknown as Record<string, unknown>;
+    const candidate =
+      raw['descripciones_dias'] ??
+      raw['descripcionesDias'] ??
+      raw['descripcionesdias'] ??
+      null;
+
+    console.log('[mi-plan] candidate descripciones:', candidate);
+
+    let parsed: unknown = candidate;
+
+    if (typeof parsed === 'string') {
+      try {
+        parsed = JSON.parse(parsed);
+      } catch {
+        parsed = [];
+      }
+    }
+
+    if (Array.isArray(parsed)) {
+      console.log('[mi-plan] parsed descripciones (array):', parsed);
+      return parsed.map((item) => (typeof item === 'string' ? item.trim() : '')).filter((_, index) => true);
+    }
+
+    if (parsed && typeof parsed === 'object') {
+      console.log('[mi-plan] parsed descripciones (object):', parsed);
+      const values = Object.entries(parsed)
+        .sort(([a], [b]) => Number(a) - Number(b))
+        .map(([, value]) => (typeof value === 'string' ? value.trim() : ''));
+      return values;
+    }
+
+    console.log('[mi-plan] parsed descripciones vacio.');
+
+    return [];
   }
 
   private buildExerciseNameMap(grupos: CatalogoGrupoMuscular[]): void {
@@ -246,8 +293,11 @@ export class MiPlan implements OnInit {
       ensureSpace(18);
       document.setFont('helvetica', 'bold');
       document.setFontSize(14);
-      document.text(day.label, margin, cursorY);
-      cursorY += 7;
+      const dayHeading = day.description ? `${day.label} - ${day.description}` : day.label;
+      const dayHeadingLines = document.splitTextToSize(dayHeading, contentWidth);
+      document.text(dayHeadingLines, margin, cursorY);
+      cursorY += dayHeadingLines.length * 5;
+      cursorY += 2;
 
       document.setFont('helvetica', 'normal');
       document.setFontSize(11);

@@ -15,7 +15,7 @@
 }
 
 .memberships-shell {
-	width: min(100%, 980px);
+	width: min(100%, 1220px);
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -37,7 +37,7 @@
 	width: 100%;
 	background: #8f959c;
 	border-radius: 24px;
-	padding: 0.62rem 0.95rem 0.85rem;
+	padding: 0.56rem 0.62rem 0.8rem;
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
 	overflow: hidden;
 }
@@ -63,17 +63,17 @@ table {
 	width: 100%;
 	border-collapse: collapse;
 	color: #191c20;
-	min-width: 760px;
+	table-layout: fixed;
 }
 
 thead th {
-	padding: 0.55rem 1.15rem;
+	padding: 0.42rem 0.32rem;
 	background: #4f5660;
 	font-family: 'Teko', sans-serif;
-	font-size: 2rem;
+	font-size: 1.55rem;
 	line-height: 0.9;
 	text-transform: uppercase;
-	letter-spacing: 0.02em;
+	letter-spacing: 0.01em;
 	text-align: left;
 	color: #d8dde1;
 }
@@ -91,13 +91,44 @@ thead th:last-child {
 }
 
 tbody td {
-	padding: 0.82rem 1.15rem;
+	padding: 0.52rem 0.38rem;
 	font-family: 'Teko', sans-serif;
-	font-size: 2rem;
+	font-size: 1.42rem;
 	line-height: 0.9;
 	letter-spacing: 0.01em;
 	border-bottom: 1px solid rgba(239, 242, 244, 0.36);
 	vertical-align: middle;
+	overflow-wrap: anywhere;
+}
+
+thead th:nth-child(1),
+tbody td:nth-child(1) {
+	width: 17%;
+}
+
+thead th:nth-child(2),
+tbody td:nth-child(2) {
+	width: 30%;
+}
+
+thead th:nth-child(3),
+tbody td:nth-child(3) {
+	width: 14%;
+}
+
+thead th:nth-child(4),
+tbody td:nth-child(4) {
+	width: 13%;
+}
+
+thead th:nth-child(5),
+tbody td:nth-child(5) {
+	width: 11%;
+}
+
+thead th:nth-child(6),
+tbody td:nth-child(6) {
+	width: 11%;
 }
 
 .editing-row td {
@@ -111,31 +142,31 @@ tbody tr:last-child td {
 .cost-cell {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.42rem;
+	gap: 0.26rem;
 }
 
 .cost-value {
-	min-width: 96px;
+	min-width: 0;
 	display: inline-block;
 }
 
 .cost-input {
-	width: 110px;
-	padding: 0.1rem 0.38rem;
+	width: 78px;
+	padding: 0.08rem 0.28rem;
 	border: 1px solid rgba(46, 53, 60, 0.58);
 	border-radius: 8px;
 	background: #dce1e5;
 	color: #1d2125;
 	font-family: 'Teko', sans-serif;
-	font-size: 1.6rem;
+	font-size: 1.28rem;
 	line-height: 1;
 	letter-spacing: 0.01em;
 	outline: 0;
 }
 
 .name-input {
-	min-width: 150px;
-	padding: 0.25rem 0.42rem;
+	width: 100%;
+	padding: 0.2rem 0.34rem;
 	border: 1px solid rgba(46, 53, 60, 0.58);
 	border-radius: 8px;
 	background: #dce1e5;
@@ -148,9 +179,43 @@ tbody tr:last-child td {
 	text-transform: uppercase;
 }
 
+.description-input {
+	width: 100%;
+	padding: 0.2rem 0.34rem;
+	border: 1px solid rgba(46, 53, 60, 0.58);
+	border-radius: 8px;
+	background: #dce1e5;
+	color: #1d2125;
+	font-family: 'Sora', sans-serif;
+	font-size: 0.92rem;
+	font-weight: 500;
+	line-height: 1.2;
+	outline: 0;
+	resize: none;
+	min-height: 2.4rem;
+	overflow-y: hidden;
+}
+
+.description-input::placeholder {
+	color: rgba(29, 33, 37, 0.6);
+	font-weight: 400;
+}
+
+.description-cell {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.26rem;
+	width: 100%;
+}
+
+.description-cell span {
+	flex: 1;
+	white-space: pre-line;
+}
+
 .type-select {
-	min-width: 140px;
-	padding: 0.3rem 0.45rem;
+	width: 100%;
+	padding: 0.24rem 0.34rem;
 	border: 1px solid rgba(46, 53, 60, 0.58);
 	border-radius: 8px;
 	background: #dce1e5;
@@ -169,23 +234,23 @@ tbody tr:last-child td {
 .days-cell {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.42rem;
+	gap: 0.26rem;
 }
 
 .days-value {
-	min-width: 48px;
+	min-width: 0;
 	display: inline-block;
 }
 
 .days-input {
-	width: 70px;
-	padding: 0.1rem 0.38rem;
+	width: 54px;
+	padding: 0.08rem 0.28rem;
 	border: 1px solid rgba(46, 53, 60, 0.58);
 	border-radius: 8px;
 	background: #dce1e5;
 	color: #1d2125;
 	font-family: 'Teko', sans-serif;
-	font-size: 1.6rem;
+	font-size: 1.28rem;
 	line-height: 1;
 	letter-spacing: 0.01em;
 	outline: 0;
@@ -195,8 +260,8 @@ tbody tr:last-child td {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 28px;
-	height: 28px;
+	width: 24px;
+	height: 24px;
 	padding: 0;
 	border: 0;
 	background: transparent;
@@ -211,7 +276,7 @@ tbody tr:last-child td {
 }
 
 .action-cell {
-	text-align: right;
+	text-align: left;
 	white-space: normal;
 	width: 1%;
 }
@@ -219,10 +284,10 @@ tbody tr:last-child td {
 .action-buttons {
 	display: inline-flex;
 	align-items: center;
-	justify-content: flex-end;
+	justify-content: flex-start;
 	flex-wrap: wrap;
-	gap: 0.45rem;
-	max-width: 180px;
+	gap: 0.22rem;
+	max-width: 150px;
 }
 
 .action-buttons--idle {
@@ -233,13 +298,13 @@ tbody tr:last-child td {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.3rem;
-	padding: 0.36rem 0.72rem;
+	padding: 0.3rem 0.56rem;
 	border: 0;
 	border-radius: 999px;
 	background: #1d5f2a;
 	color: #eff7f1;
 	font-family: 'Sora', sans-serif;
-	font-size: 0.84rem;
+	font-size: 0.74rem;
 	font-weight: 700;
 	line-height: 1;
 	text-transform: uppercase;
@@ -266,26 +331,26 @@ tbody tr:last-child td {
 }
 
 .cancel-button {
-	padding: 0.36rem 0.72rem;
+	padding: 0.3rem 0.56rem;
 	border: 0;
 	border-radius: 999px;
 	background: #5d6670;
 	color: #eef3f6;
 	font-family: 'Sora', sans-serif;
-	font-size: 0.84rem;
+	font-size: 0.74rem;
 	font-weight: 700;
 	text-transform: uppercase;
 	cursor: pointer;
 }
 
 .delete-button {
-	padding: 0.36rem 0.72rem;
+	padding: 0.3rem 0.56rem;
 	border: 0;
 	border-radius: 999px;
 	background: #8c2f36;
 	color: #fff4f4;
 	font-family: 'Sora', sans-serif;
-	font-size: 0.84rem;
+	font-size: 0.74rem;
 	font-weight: 700;
 	text-transform: uppercase;
 	cursor: pointer;
@@ -335,21 +400,17 @@ tbody tr:last-child td {
 		padding: 0.55rem 0.65rem 0.75rem;
 	}
 
-	table {
-		min-width: 720px;
-	}
-
 	thead th,
 	tbody td {
-		white-space: nowrap;
+		white-space: normal;
 	}
 
 	thead th {
-		font-size: 1.68rem;
+		font-size: 1.38rem;
 	}
 
 	tbody td {
-		font-size: 1.6rem;
+		font-size: 1.15rem;
 	}
 
 	.save-button {

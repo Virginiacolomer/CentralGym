@@ -85,8 +85,8 @@ export class MiMembresia implements OnInit {
     return this.getMembershipType(membership.membresiaId);
   }
 
-  getMembershipDays(membership: UserMembresiaResponse): number {
-    return membership?.membresia?.dias ?? 0;
+  getMembershipDays(membership: UserMembresiaResponse): string {
+    return membership?.membresia?.dias?.trim() || 'Sin frecuencia';
   }
 
   getMembershipCost(membership: UserMembresiaResponse): number {
