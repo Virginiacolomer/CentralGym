@@ -3,6 +3,9 @@ import { PlanEntrenamientoService } from './plan-entrenamiento.service';
 import { CreatePlanEntrenamientoDto } from './dto/create-plan-entrenamiento.dto';
 import { UpdatePlanEntrenamientoDto } from './dto/update-plan-entrenamiento.dto';
 import { CreateEjercicioDto } from './dto/create-ejercicio.dto';
+import { CreateGrupoMuscularDto } from './dto/create-grupo-muscular.dto';
+import { UpdateEjercicioDto } from './dto/update-ejercicio.dto';
+import { UpdateGrupoMuscularDto } from './dto/update-grupo-muscular.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -29,8 +32,32 @@ export class PlanEntrenamientoController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Post('grupos-musculares')
-  createGrupoMuscular(@Body() createGrupoMuscularDto: { nombre: string }) {
+  createGrupoMuscular(@Body() createGrupoMuscularDto: CreateGrupoMuscularDto) {
     return this.planEntrenamientoService.createGrupoMuscular(createGrupoMuscularDto);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Patch('ejercicios/:id')
+  updateEjercicio(@Param('id') id: string, @Body() updateEjercicioDto: UpdateEjercicioDto) {
+    return this.planEntrenamientoService.updateEjercicio(+id, updateEjercicioDto);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Delete('ejercicios/:id')
+  removeEjercicio(@Param('id') id: string) {
+    return this.planEntrenamientoService.removeEjercicio(+id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Patch('grupos-musculares/:id')
+  updateGrupoMuscular(
+    @Param('id') id: string,
+    @Body() updateGrupoMuscularDto: UpdateGrupoMuscularDto,
+  ) {
+    return this.planEntrenamientoService.updateGrupoMuscular(+id, updateGrupoMuscularDto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

@@ -8,6 +8,9 @@ import { Ejercicio } from './entities/ejercicio.entity';
 import { GrupoMuscular } from './entities/grupoMuscular.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateEjercicioDto } from './dto/create-ejercicio.dto';
+import { CreateGrupoMuscularDto } from './dto/create-grupo-muscular.dto';
+import { UpdateEjercicioDto } from './dto/update-ejercicio.dto';
+import { UpdateGrupoMuscularDto } from './dto/update-grupo-muscular.dto';
 
 @Injectable()
 export class PlanEntrenamientoService {
@@ -374,7 +377,7 @@ export class PlanEntrenamientoService {
     };
   }
 
-  async createGrupoMuscular(createGrupoMuscularDto: { nombre: string }) {
+  async createGrupoMuscular(createGrupoMuscularDto: CreateGrupoMuscularDto) {
     const normalizedNombre = this.normalizeExerciseName(createGrupoMuscularDto.nombre);
 
     if (!normalizedNombre) {
@@ -406,6 +409,132 @@ export class PlanEntrenamientoService {
       id: saved.id,
       nombre: saved.nombre,
       message: 'Grupo muscular creado correctamente.',
+    };
+  }
+
+  async updateEjercicio(id: number, updateEjercicioDto: UpdateEjercicioDto) {
+    const ejercicio = await this.ejercicioRepository.findOne({
+      where: { id },
+      relations: {
+        grupoMuscular: true,
+      },
+    });
+
+    if (!ejercicio) {
+      throw new NotFoundException(`No se encontro el ejercicio con id ${id}`);
+    }
+
+    const hasNombre = typeof updateEjercicioDto.nombre === 'string';
+    const hasGrupoMuscularId = updateEjercicioDto.grupoMuscularId !== undefined;
+
+    if (!hasNombre && !hasGrupoMuscularId) {
+      throw new BadRequestException('Debes enviar al menos un campo para actualizar el ejercicio.');
+    }
+
+    if (hasNombre) {
+      const normalizedNombre = this.normalizeExerciseName(updateEjercicioDto.nombre ?? '');
+
+      if (!normalizedNombre) {
+        throw new BadRequestException('El nombre del ejercicio es obligatorio.');
+      }
+
+      const ejerciciosExistentes = await this.ejercicioRepository.find({
+        select: {
+          id: true,
+          nombre: true,
+        },
+      });
+
+      const duplicate = ejerciciosExistentes.find(
+        (item) => item.id !== id && this.normalizeExerciseName(item.nombre) === normalizedNombre,
+      );
+
+      if (duplicate) {
+        throw new ConflictException('El ejercicio ya existe y no se puede guardar con ese nombre.');
+      }
+
+      ejercicio.nombre = normalizedNombre;
+    }
+
+    if (hasGrupoMuscularId) {
+      const grupoMuscularId = Number(updateEjercicioDto.grupoMuscularId);
+      const grupoMuscular = await this.grupoMuscularRepository.findOne({
+        where: { id: grupoMuscularId },
+      });
+
+      if (!grupoMuscular) {
+        throw new NotFoundException(`No se encontro el grupo muscular con id ${grupoMuscularId}`);
+      }
+
+      ejercicio.grupoMuscular = grupoMuscular;
+    }
+
+    const saved = await this.ejercicioRepository.save(ejercicio);
+
+    return {
+      id: saved.id,
+      nombre: saved.nombre,
+      grupoMuscularId: saved.grupoMuscular?.id ?? ejercicio.grupoMuscular.id,
+      message: 'Ejercicio actualizado correctamente.',
+    };
+  }
+
+  async updateGrupoMuscular(id: number, updateGrupoMuscularDto: UpdateGrupoMuscularDto) {
+    const grupoMuscular = await this.grupoMuscularRepository.findOne({ where: { id } });
+
+    if (!grupoMuscular) {
+      throw new NotFoundException(`No se encontro el grupo muscular con id ${id}`);
+    }
+
+    const hasNombre = typeof updateGrupoMuscularDto.nombre === 'string';
+
+    if (!hasNombre) {
+      throw new BadRequestException('Debes enviar al menos un campo para actualizar el grupo muscular.');
+    }
+
+    const normalizedNombre = this.normalizeExerciseName(updateGrupoMuscularDto.nombre ?? '');
+
+    if (!normalizedNombre) {
+      throw new BadRequestException('El nombre del grupo muscular es obligatorio.');
+    }
+
+    const gruposExistentes = await this.grupoMuscularRepository.find({
+      select: {
+        id: true,
+        nombre: true,
+      },
+    });
+
+    const duplicate = gruposExistentes.find(
+      (item) => item.id !== id && this.normalizeExerciseName(item.nombre) === normalizedNombre,
+    );
+
+    if (duplicate) {
+      throw new ConflictException('El grupo muscular ya existe y no se puede guardar con ese nombre.');
+    }
+
+    grupoMuscular.nombre = normalizedNombre;
+    const saved = await this.grupoMuscularRepository.save(grupoMuscular);
+
+    return {
+      id: saved.id,
+      nombre: saved.nombre,
+      message: 'Grupo muscular actualizado correctamente.',
+    };
+  }
+
+  async removeEjercicio(id: number) {
+    const ejercicio = await this.ejercicioRepository.findOne({ where: { id } });
+
+    if (!ejercicio) {
+      throw new NotFoundException(`No se encontro el ejercicio con id ${id}`);
+    }
+
+    await this.ejercicioRepository.delete(id);
+
+    return {
+      id,
+      message: 'Ejercicio eliminado correctamente.',
     };
   }
 

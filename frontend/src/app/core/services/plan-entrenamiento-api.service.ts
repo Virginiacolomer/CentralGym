@@ -38,6 +38,15 @@ export interface CreateGrupoMuscularRequest {
   nombre: string;
 }
 
+export interface UpdateGrupoMuscularRequest {
+  nombre: string;
+}
+
+export interface UpdateEjercicioRequest {
+  nombre?: string;
+  grupoMuscularId?: number;
+}
+
 export interface CreateGrupoMuscularResponse {
   id: number;
   nombre: string;
@@ -48,6 +57,24 @@ export interface CreateEjercicioResponse {
   id: number;
   nombre: string;
   grupoMuscularId: number;
+  message: string;
+}
+
+export interface UpdateGrupoMuscularResponse {
+  id: number;
+  nombre: string;
+  message: string;
+}
+
+export interface UpdateEjercicioResponse {
+  id: number;
+  nombre: string;
+  grupoMuscularId: number;
+  message: string;
+}
+
+export interface DeleteEjercicioResponse {
+  id: number;
   message: string;
 }
 
@@ -118,6 +145,29 @@ export class PlanEntrenamientoApiService {
     return this.http.post<CreateGrupoMuscularResponse>(
       `${this.apiBaseUrl}/plan-entrenamiento/grupos-musculares`,
       payload,
+    ).pipe(timeout(10000));
+  }
+
+  updateGrupoMuscular(
+    grupoId: number,
+    payload: UpdateGrupoMuscularRequest,
+  ): Observable<UpdateGrupoMuscularResponse> {
+    return this.http.patch<UpdateGrupoMuscularResponse>(
+      `${this.apiBaseUrl}/plan-entrenamiento/grupos-musculares/${grupoId}`,
+      payload,
+    ).pipe(timeout(10000));
+  }
+
+  updateEjercicio(ejercicioId: number, payload: UpdateEjercicioRequest): Observable<UpdateEjercicioResponse> {
+    return this.http.patch<UpdateEjercicioResponse>(
+      `${this.apiBaseUrl}/plan-entrenamiento/ejercicios/${ejercicioId}`,
+      payload,
+    ).pipe(timeout(10000));
+  }
+
+  deleteEjercicio(ejercicioId: number): Observable<DeleteEjercicioResponse> {
+    return this.http.delete<DeleteEjercicioResponse>(
+      `${this.apiBaseUrl}/plan-entrenamiento/ejercicios/${ejercicioId}`,
     ).pipe(timeout(10000));
   }
 
